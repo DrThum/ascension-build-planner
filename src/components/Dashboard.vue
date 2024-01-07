@@ -1,6 +1,4 @@
 <template>
-  <h1>WoW Ascension Build Planner</h1>
-
   <div id="spells-and-groups">
     <SpellList title="Abilities" :spells="abilities" />
     <SpellList title="Talents" :spells="talents" />
