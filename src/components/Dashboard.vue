@@ -1,7 +1,7 @@
 <template>
   <div id="spells-and-groups">
-    <SpellList title="Abilities" :spells="abilities" />
-    <SpellList title="Talents" :spells="talents" />
+    <SpellList title="Abilities" :spells="staticStore.abilities" />
+    <SpellList title="Talents" :spells="staticStore.talents" />
     <SpellGroupList />
   </div>
 </template>
@@ -10,10 +10,9 @@
 import SpellGroupList from './SpellGroupList.vue'
 import SpellList from './SpellList.vue'
 
-import skillCards from '../assets/skill_cards.json'
+import { useStaticStore } from '@/stores/static'
 
-const abilities = skillCards.SkillCardsExplorerSkillsDB;
-const talents = skillCards.SkillCardsExplorerTalentsDB;
+const staticStore = useStaticStore()
 </script>
 
 <style scoped>
