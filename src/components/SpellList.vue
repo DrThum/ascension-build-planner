@@ -2,11 +2,14 @@
   <div class="spell-list">
     <h2>{{ title }}</h2>
 
-    <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch">
+    <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch"
+      scrollHeight="500px">
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">{{ slotProps.option.spellName }}</p>
-          <p class="result-description" style="max-width: 500px;">{{ slotProps.option.description }}</p>
+          <p class="result-description" style="max-width: 500px; white-space: normal;">
+            {{ slotProps.option.description }}
+          </p>
         </div>
       </template>
     </AutoComplete>
@@ -20,13 +23,14 @@
 </template>
 
 <script setup lang="ts">
+import type { Spell } from '../types/cards.types'
 import AutoComplete from 'primevue/autocomplete'
 import { ref } from 'vue'
 
-const props = defineProps({ title: String, spells: Array<{ spellId: number; spellName: string; description: string }> })
+const props = defineProps({ title: String, spells: Array<Spell> })
 
 const search = ref('')
-const searchResults = ref([] as Array<{ spellId: number; spellName: string }>)
+const searchResults = ref([] as Array<Spell>)
 
 function performSearch() {
   searchResults.value = props.spells!.filter((spell) => {
