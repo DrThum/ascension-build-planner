@@ -15,9 +15,9 @@
     </AutoComplete>
 
     <ul class="spells-list">
-      <li v-for="spell in spells">
+      <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
         {{ spell.spellName }}
-        <Button icon="pi pi-trash" severity="danger" text rounded />
+        <Button icon="pi pi-trash" severity="secondary" text rounded />
       </li>
     </ul>
   </div>
@@ -61,6 +61,18 @@ function spellSelected(ev: AutoCompleteItemSelectEvent) {
   spellIds.value!.push(ev.value.spellId);
   search.value = '';
 };
+
+function qualityToCssClass(quality: string) {
+  switch (quality) {
+    case "SKILL_CARD_POOR": return 'quality-poor';
+    case "SKILL_CARD_COMMON": return 'quality-common';
+    case "SKILL_CARD_UNCOMMON": return 'quality-uncommon';
+    case "SKILL_CARD_RARE": return 'quality-rare';
+    case "SKILL_CARD_EPIC": return 'quality-epic';
+    case "SKILL_CARD_LEGENDARY": return 'quality-legendary';
+    default: return '';
+  }
+}
 </script>
 
 <style>
@@ -91,5 +103,29 @@ ul.spells-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+ul.spells-list li.quality-poor {
+  border-color: #9d9d9d;
+}
+
+ul.spells-list li.quality-common {
+  border-color: #ffffff;
+}
+
+ul.spells-list li.quality-uncommon {
+  border-color: #1eff00;
+}
+
+ul.spells-list li.quality-rare {
+  border-color: #0070dd;
+}
+
+ul.spells-list li.quality-epic {
+  border-color: #a335ee;
+}
+
+ul.spells-list li.quality-legendary {
+  border-color: #ff8000;
 }
 </style>
