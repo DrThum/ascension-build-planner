@@ -1,14 +1,16 @@
 <template>
   <header>
-    <Dropdown v-model="selectedBuildName" :options="savedBuildKeys" />
-    <InputText type="text" v-model="buildName" />
+    <Dropdown v-model="selectedBuildName" @change="buildSelected" :options="savedBuilds" optionLabel="name" />
+    <InputText type="text" v-model="currentBuild.name" />
     <Button label="Save" @click="saveBuild" />
+
+    {{ currentBuild }}
   </header>
   <div id="skills-and-groups">
     <div id="skills">
       <div class="lists">
-        <SpellList title="Abilities" :spells="staticStore.abilities" />
-        <SpellList title="Talents" :spells="staticStore.talents" />
+        <SpellList title="Abilities" :spellIds="currentBuild.abilitiesCards" type="abilities" />
+        <SpellList title="Talents" :spellIds="currentBuild.talentsCards" type="talents" />
       </div>
     </div>
     <SpellGroupList />
@@ -16,34 +18,41 @@
 </template>
 
 <script setup async lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { ref, type Ref, reactive, toRaw } from 'vue'
 
 import Button from 'primevue/button'
-import Dropdown from 'primevue/dropdown'
+import Dropdown, { type DropdownChangeEvent } from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 
 import SpellGroupList from './SpellGroupList.vue'
 import SpellList from './SpellList.vue'
-import { save, list } from '@/services/build.service'
+import { upsert, list } from '@/services/build.service'
 import type { Build } from '@/types/build.types';
 
-const buildName = ref('my build')
-const selectedBuildName = ref(undefined)
-
-import { useStaticStore } from '@/stores/static'
 import { useObservable } from '@vueuse/rxjs'
 import { liveQuery } from 'dexie'
 
-const staticStore = useStaticStore()
+const selectedBuildName = ref<string>('')
 
-async function saveBuild() {
-  await save({ name: buildName.value, abilitiesCards: [], talentsCards: [] })
+const currentBuild = reactive({
+  id: undefined,
+  name: '',
+  abilitiesCards: [],
+  talentsCards: [],
+} as Build)
+
+function buildSelected(ev: DropdownChangeEvent) {
+  currentBuild.id = ev.value.id;
+  currentBuild.name = ev.value.name;
+  currentBuild.abilitiesCards = ev.value.abilitiesCards;
+  currentBuild.talentsCards = ev.value.talentsCards;
 }
 
-const savedBuildsQuery = liveQuery(async () => list());
-const savedBuilds: Ref<Build[]> = useObservable(savedBuildsQuery);
-const savedBuildKeys = ref([] as string[]);
-savedBuildsQuery.subscribe((val) => savedBuildKeys.value = val.map((build) => build.name));
+async function saveBuild() {
+  await upsert(toRaw(currentBuild))
+}
+
+const savedBuilds: Ref<Build[]> = useObservable(liveQuery(async () => list()));
 </script>
 
 <style scoped>

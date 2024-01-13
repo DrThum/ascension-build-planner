@@ -25,18 +25,29 @@
 <script setup lang="ts">
 import type { Spell } from '../types/cards.types'
 import AutoComplete from 'primevue/autocomplete'
-import { ref } from 'vue'
+import { useStaticStore } from '@/stores/static'
+import { computed, ref, type Ref } from 'vue'
 
-const props = defineProps({ title: String, spells: Array<Spell> })
+const staticStore = useStaticStore()
+
+const props = defineProps({ title: String, spellIds: Array<Number>, type: String /* TODO enum */ })
 
 const search = ref('')
 const searchResults = ref([] as Array<Spell>)
 
 function performSearch() {
-  searchResults.value = props.spells!.filter((spell) => {
-    return `${spell.spellName} ${spell.description}`.toLowerCase().includes(search.value.toLowerCase())
+  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+
+  searchResults.value = source.filter((spellId) => {
+    return `${spellId.spellName} ${spellId.description}`.toLowerCase().includes(search.value.toLowerCase())
   });
 }
+
+const spells = computed(() => {
+  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+
+  return props.spellIds!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
+})
 </script>
 
 <style>

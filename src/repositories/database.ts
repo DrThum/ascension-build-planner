@@ -7,7 +7,7 @@ class BuildPlannerDexie extends Dexie {
   constructor() {
     super('ascension-build-planner');
     this.version(1).stores({
-      builds: '&name',
+      builds: '++id, &name',
     })
   }
 }
