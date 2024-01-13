@@ -6,6 +6,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 
 import 'primevue/resources/themes/lara-dark-blue/theme.css'
+import 'primeicons/primeicons.css'
 
 const app = createApp(App)
 

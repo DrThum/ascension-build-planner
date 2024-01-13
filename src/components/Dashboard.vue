@@ -2,15 +2,15 @@
   <header>
     <Dropdown v-model="selectedBuildName" @change="buildSelected" :options="savedBuilds" optionLabel="name" />
     <InputText type="text" v-model="currentBuild.name" />
-    <Button label="Save" @click="saveBuild" />
+    <Button icon="pi pi-save" severity="success" @click="saveBuild" />
 
     {{ currentBuild }}
   </header>
   <div id="skills-and-groups">
     <div id="skills">
       <div class="lists">
-        <SpellList title="Abilities" :spellIds="currentBuild.abilitiesCards" type="abilities" />
-        <SpellList title="Talents" :spellIds="currentBuild.talentsCards" type="talents" />
+        <SpellList title="Abilities" v-model="currentBuild.abilitiesCards" type="abilities" />
+        <SpellList title="Talents" v-model="currentBuild.talentsCards" type="talents" />
       </div>
     </div>
     <SpellGroupList />

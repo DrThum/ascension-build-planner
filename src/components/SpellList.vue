@@ -3,7 +3,7 @@
     <h2>{{ title }}</h2>
 
     <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch"
-      scrollHeight="500px">
+      @item-select="spellSelected" scrollHeight="500px">
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">{{ slotProps.option.spellName }}</p>
@@ -24,13 +24,15 @@
 
 <script setup lang="ts">
 import type { Spell } from '../types/cards.types'
-import AutoComplete from 'primevue/autocomplete'
+import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
 import { useStaticStore } from '@/stores/static'
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, defineModel, type ModelRef } from 'vue'
 
 const staticStore = useStaticStore()
 
-const props = defineProps({ title: String, spellIds: Array<Number>, type: String /* TODO enum */ })
+const spellIds: ModelRef<Number[] | undefined, string> = defineModel();
+
+const props = defineProps({ title: String, type: String /* TODO enum */ })
 
 const search = ref('')
 const searchResults = ref([] as Array<Spell>)
@@ -46,8 +48,12 @@ function performSearch() {
 const spells = computed(() => {
   const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
 
-  return props.spellIds!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
+  return spellIds.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
 })
+
+function spellSelected(ev: AutoCompleteItemSelectEvent) {
+  spellIds.value!.push(ev.value.spellId)
+};
 </script>
 
 <style>

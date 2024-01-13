@@ -16,6 +16,7 @@
     "@vueuse/rxjs": "^10.7.1",
     "dexie": "^3.2.4",
     "pinia": "^2.1.7",
+    "primeicons": "^6.0.1",
     "primevue": "^3.46.0",
     "rxjs": "^7.8.1",
     "vue": "^3.3.11"
