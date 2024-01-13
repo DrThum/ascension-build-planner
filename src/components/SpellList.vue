@@ -1,9 +1,9 @@
 <template>
-  <div class="spell-list">
+  <div class="spell-list-container">
     <h2>{{ title }}</h2>
 
     <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch"
-      @item-select="spellSelected" scrollHeight="500px">
+      @item-select="spellSelected" scrollHeight="500px" :placeholder="`Search ${props.title}`">
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">{{ slotProps.option.spellName }}</p>
@@ -14,9 +14,10 @@
       </template>
     </AutoComplete>
 
-    <ul>
+    <ul class="spells-list">
       <li v-for="spell in spells">
-        {{ spell.spellName }} ({{ spell.spellId }})
+        {{ spell.spellName }}
+        <Button icon="pi pi-trash" severity="danger" text rounded />
       </li>
     </ul>
   </div>
@@ -26,6 +27,7 @@
 import _ from 'lodash';
 import type { Spell } from '../types/cards.types'
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
+import Button from 'primevue/button'
 import { useStaticStore } from '@/stores/static'
 import { computed, ref, defineModel, type ModelRef } from 'vue'
 
@@ -62,8 +64,9 @@ function spellSelected(ev: AutoCompleteItemSelectEvent) {
 </script>
 
 <style>
-.spell-list {
+.spell-list-container {
   flex-grow: 1;
+  margin-right: 10px;
 }
 
 .p-autocomplete .p-autocomplete-input {
@@ -72,5 +75,21 @@ function spellSelected(ev: AutoCompleteItemSelectEvent) {
 
 .result-title {
   font-weight: bold;
+}
+
+ul.spells-list {
+  padding-left: 0;
+}
+
+ul.spells-list li {
+  border: solid 1px lightgrey;
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 10px;
+  list-style: none;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

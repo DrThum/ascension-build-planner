@@ -28,7 +28,7 @@
 </template>
 
 <script setup async lang="ts">
-import { ref, type Ref, reactive, toRaw, nextTick } from 'vue'
+import { ref, type Ref, reactive, toRaw } from 'vue'
 
 import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
