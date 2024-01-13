@@ -3,7 +3,11 @@ import type { Build } from '@/types/build.types';
 import { db } from '../repositories/database';
 
 export async function upsert(build: Build) {
-  return await db.builds.put(build);
+  return await db.builds.put(build) as Number;
+}
+
+export async function deleteById(id: number) {
+  await db.builds.delete(id);
 }
 
 export function list() {
