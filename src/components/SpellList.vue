@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import _ from 'lodash';
 import type { Spell } from '../types/cards.types'
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
 import { useStaticStore } from '@/stores/static'
@@ -37,11 +38,14 @@ const props = defineProps({ title: String, type: String /* TODO enum */ })
 const search = ref('')
 const searchResults = ref([] as Array<Spell>)
 
-function performSearch() {
-  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+const source = _.uniqBy(props.type === 'abilities' ? staticStore.abilities : staticStore.talents, s => s.cardId);
 
+function performSearch() {
   searchResults.value = source.filter((spellId) => {
-    return `${spellId.spellName} ${spellId.description}`.toLowerCase().includes(search.value.toLowerCase())
+    const spellAlreadyChosen = spells.value.includes(spellId);
+    const spellNameOrDescriptionMatches = `${spellId.spellName} ${spellId.description}`.toLowerCase().includes(search.value.toLowerCase());
+
+    return !spellAlreadyChosen && spellNameOrDescriptionMatches;
   });
 }
 
@@ -52,7 +56,8 @@ const spells = computed(() => {
 })
 
 function spellSelected(ev: AutoCompleteItemSelectEvent) {
-  spellIds.value!.push(ev.value.spellId)
+  spellIds.value!.push(ev.value.spellId);
+  search.value = '';
 };
 </script>
 
