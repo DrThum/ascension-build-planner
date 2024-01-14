@@ -11,18 +11,29 @@
     </ul>
 
     <ul class="spells-list">
-      <li v-for="spell in cardedGoldenAsSpells" :class="qualityToCssClass(spell?.quality)" class="golden">
+      <li
+        v-for="spell in cardedGoldenAsSpells"
+        :class="qualityToCssClass(spell?.quality)"
+        class="golden"
+      >
         <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
       </li>
     </ul>
 
     <h3>All {{ title?.toLowerCase() }}</h3>
-    <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch"
-      @item-select="spellSelected" scrollHeight="500px" :placeholder="`Search ${props.title}`">
+    <AutoComplete
+      v-model="search"
+      :suggestions="searchResults"
+      optionLabel="spellName"
+      @complete="performSearch"
+      @item-select="spellSelected"
+      scrollHeight="500px"
+      :placeholder="`Search ${props.title}`"
+    >
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">{{ slotProps.option.spellName }}</p>
-          <p class="result-description" style="max-width: 500px; white-space: normal;">
+          <p class="result-description" style="max-width: 500px; white-space: normal">
             {{ slotProps.option.description }}
           </p>
         </div>
@@ -33,13 +44,29 @@
       <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
         <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
         <div>
-          <Button icon="pi pi-credit-card" severity="secondary" text rounded
-            @click="toggleMenu(spell?.spellId, $event)" />
-          <Menu :ref="(el) => (slotCardMenuRefs[spell!.spellId] = el)"
-            :model="[{ label: 'Slot as normal', command: () => slotCard(spell!.spellId, false) }, { label: 'Slot as golden', command: () => slotCard(spell!.spellId, true) }]"
-            :popup="true" />
-          <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded
-            @click="removeSpell(spell?.spellId)" />
+          <Button
+            icon="pi pi-credit-card"
+            severity="secondary"
+            text
+            rounded
+            @click="toggleMenu(spell?.spellId, $event)"
+          />
+          <Menu
+            :ref="(el) => (slotCardMenuRefs[spell!.spellId] = el)"
+            :model="[
+              { label: 'Slot as normal', command: () => slotCard(spell!.spellId, false) },
+              { label: 'Slot as golden', command: () => slotCard(spell!.spellId, true) },
+            ]"
+            :popup="true"
+          />
+          <Button
+            icon="pi pi-trash"
+            role="remove-spell"
+            severity="secondary"
+            text
+            rounded
+            @click="removeSpell(spell?.spellId)"
+          />
         </div>
       </li>
     </ul>
@@ -48,16 +75,16 @@
 
 <script setup lang="ts">
 import _ from 'lodash';
-import type { Spell } from '../types/cards.types'
-import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
-import Button from 'primevue/button'
-import Menu from 'primevue/menu'
-import { useStaticStore } from '@/stores/static'
-import { computed, ref, defineModel, type ModelRef } from 'vue'
+import type { Spell } from '../types/cards.types';
+import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete';
+import Button from 'primevue/button';
+import Menu from 'primevue/menu';
+import { useStaticStore } from '@/stores/static';
+import { computed, ref, defineModel, type ModelRef } from 'vue';
 
-import { type CardFamily } from '@/types/cards.types'
+import { type CardFamily } from '@/types/cards.types';
 
-const staticStore = useStaticStore()
+const staticStore = useStaticStore();
 
 const spellIds: ModelRef<Number[] | undefined, string> = defineModel();
 const cardedNormal = defineModel('cardSlotsNormal');
@@ -65,17 +92,22 @@ const cardedGolden = defineModel('cardSlotsGolden');
 
 const slotCardMenuRefs = ref({});
 
-const props = defineProps({ title: String, type: CardFamily })
+const props = defineProps({ title: String, type: CardFamily });
 
-const search = ref('')
-const searchResults = ref([] as Array<Spell>)
+const search = ref('');
+const searchResults = ref([] as Array<Spell>);
 
-const source = _.uniqBy(props.type === 'abilities' ? staticStore.abilities : staticStore.talents, s => s.cardId);
+const source = _.uniqBy(
+  props.type === 'abilities' ? staticStore.abilities : staticStore.talents,
+  (s) => s.cardId,
+);
 
 function performSearch() {
   searchResults.value = source.filter((spellId) => {
     const spellAlreadyChosen = spells.value.includes(spellId);
-    const spellNameOrDescriptionMatches = `${spellId.spellName} ${spellId.description}`.toLowerCase().includes(search.value.toLowerCase());
+    const spellNameOrDescriptionMatches = `${spellId.spellName} ${spellId.description}`
+      .toLowerCase()
+      .includes(search.value.toLowerCase());
 
     return !spellAlreadyChosen && spellNameOrDescriptionMatches;
   });
@@ -85,37 +117,48 @@ const spells = computed(() => {
   const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
 
   // TODO: Move the ability to get a spell by ID to the static store
-  return spellIds.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
-})
+  return spellIds
+    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
+    .filter((spell) => spell !== undefined);
+});
 
 const cardedNormalAsSpells = computed(() => {
   const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
 
-  return cardedNormal.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
-
-})
+  return cardedNormal
+    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
+    .filter((spell) => spell !== undefined);
+});
 
 const cardedGoldenAsSpells = computed(() => {
   const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
 
-  return cardedGolden.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
-
-})
+  return cardedGolden
+    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
+    .filter((spell) => spell !== undefined);
+});
 
 function spellSelected(ev: AutoCompleteItemSelectEvent) {
   spellIds.value!.push(ev.value.spellId);
   search.value = '';
-};
+}
 
 function qualityToCssClass(quality?: string) {
   switch (quality) {
-    case "SKILL_CARD_POOR": return 'quality-poor';
-    case "SKILL_CARD_COMMON": return 'quality-common';
-    case "SKILL_CARD_UNCOMMON": return 'quality-uncommon';
-    case "SKILL_CARD_RARE": return 'quality-rare';
-    case "SKILL_CARD_EPIC": return 'quality-epic';
-    case "SKILL_CARD_LEGENDARY": return 'quality-legendary';
-    default: return '';
+    case 'SKILL_CARD_POOR':
+      return 'quality-poor';
+    case 'SKILL_CARD_COMMON':
+      return 'quality-common';
+    case 'SKILL_CARD_UNCOMMON':
+      return 'quality-uncommon';
+    case 'SKILL_CARD_RARE':
+      return 'quality-rare';
+    case 'SKILL_CARD_EPIC':
+      return 'quality-epic';
+    case 'SKILL_CARD_LEGENDARY':
+      return 'quality-legendary';
+    default:
+      return '';
   }
 }
 

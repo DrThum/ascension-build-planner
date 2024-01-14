@@ -17,7 +17,7 @@ class BuildPlannerDexie extends Dexie {
       abilityGoldenCards: '&cardId',
       talentCards: '&cardId',
       talentGoldenCards: '&cardId',
-    })
+    });
   }
 }
 

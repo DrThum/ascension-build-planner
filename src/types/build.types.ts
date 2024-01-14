@@ -8,5 +8,5 @@ export type Build = {
     abilityGolden: number[]; // Max 2
     talentNormal: number[]; // Max 3
     talentGolden: number[]; // Max 3
-  }
-}
+  };
+};

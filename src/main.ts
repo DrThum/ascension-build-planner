@@ -1,21 +1,21 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import PrimeVue from 'primevue/config'
-import { createPinia } from 'pinia'
-import App from './App.vue'
+import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
+import { createApp } from 'vue';
+import App from './App.vue';
 
-import 'primevue/resources/themes/lara-dark-blue/theme.css'
-import 'primeicons/primeicons.css'
-import Tooltip from 'primevue/tooltip'
+import 'primeicons/primeicons.css';
+import 'primevue/resources/themes/lara-dark-blue/theme.css';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(PrimeVue)
+app.use(PrimeVue);
 app.use(ToastService);
-app.use(createPinia())
+app.use(createPinia());
 
 app.directive('tooltip', Tooltip);
 
-app.mount('#app')
+app.mount('#app');

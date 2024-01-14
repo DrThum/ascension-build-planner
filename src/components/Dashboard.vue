@@ -4,24 +4,48 @@
     <div>
       <InputText type="text" v-model="currentBuild.name" />
       <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
-      <Button icon="pi pi-times" iconPos="right" label="Close" severity="secondary" @click="closeBuild" />
-      <Button icon="pi pi-trash" iconPos="right" label="Delete" severity="danger" @click="deleteBuild" />
+      <Button
+        icon="pi pi-times"
+        iconPos="right"
+        label="Close"
+        severity="secondary"
+        @click="closeBuild"
+      />
+      <Button
+        icon="pi pi-trash"
+        iconPos="right"
+        label="Delete"
+        severity="danger"
+        @click="deleteBuild"
+      />
     </div>
     <div>
-      <Button icon="pi pi-folder-open" iconPos="right" label="Import cards collection"
-        @click="isImportDialogVisible = true" />
+      <Button
+        icon="pi pi-folder-open"
+        iconPos="right"
+        label="Import cards collection"
+        @click="isImportDialogVisible = true"
+      />
     </div>
   </header>
   <main v-if="currentBuild && currentBuild.name">
     <div id="skills-and-groups">
       <div id="skills">
         <div class="lists">
-          <SpellList title="Abilities" v-model="currentBuild.abilitiesCards"
+          <SpellList
+            title="Abilities"
+            v-model="currentBuild.abilitiesCards"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormal"
-            v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGolden" type="abilities" />
-          <SpellList title="Talents" v-model="currentBuild.talentsCards"
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGolden"
+            type="abilities"
+          />
+          <SpellList
+            title="Talents"
+            v-model="currentBuild.talentsCards"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormal"
-            v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGolden" type="talents" />
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGolden"
+            type="talents"
+          />
         </div>
       </div>
       <SpellGroupList />
@@ -29,7 +53,12 @@
   </main>
   <main v-else class="no-build">
     <div v-if="savedBuilds && savedBuilds.length > 0">
-      <Dropdown v-model="selectedBuildId" :options="savedBuilds" optionLabel="name" optionValue="id" />
+      <Dropdown
+        v-model="selectedBuildId"
+        :options="savedBuilds"
+        optionLabel="name"
+        optionValue="id"
+      />
       <Button icon="pi pi-folder-open" label="Load" iconPos="right" @click="loadBuild" />
       <hr />
     </div>
@@ -48,26 +77,26 @@
 </template>
 
 <script setup async lang="ts">
-import { ref, type Ref, reactive, toRaw } from 'vue'
+import { ref, type Ref, reactive, toRaw } from 'vue';
 
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import Dropdown from 'primevue/dropdown'
-import InputText from 'primevue/inputtext'
-import TextArea from 'primevue/textarea'
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import TextArea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 
-import SpellGroupList from './SpellGroupList.vue'
-import SpellList from './SpellList.vue'
-import { deleteById, upsert, list } from '@/services/build.service'
-import { replaceCollection } from '@/services/collection.service'
+import SpellGroupList from './SpellGroupList.vue';
+import SpellList from './SpellList.vue';
+import { deleteById, upsert, list } from '@/services/build.service';
+import { replaceCollection } from '@/services/collection.service';
 import type { Build } from '@/types/build.types';
 
-import { useObservable } from '@vueuse/rxjs'
-import { liveQuery } from 'dexie'
+import { useObservable } from '@vueuse/rxjs';
+import { liveQuery } from 'dexie';
 
-const currentBuild = reactive({} as Build)
+const currentBuild = reactive({} as Build);
 const selectedBuildId = ref(0);
 const newBuildName = ref('');
 const isImportDialogVisible = ref(false);
@@ -76,7 +105,10 @@ const collectionImportString = ref('');
 const toast = useToast();
 
 function loadBuild() {
-  Object.assign(currentBuild, savedBuilds.value.find((sb) => sb.id === selectedBuildId.value));
+  Object.assign(
+    currentBuild,
+    savedBuilds.value.find((sb) => sb.id === selectedBuildId.value),
+  );
 }
 
 async function saveBuild() {
@@ -106,7 +138,7 @@ async function create() {
       abilityGolden: [],
       talentNormal: [],
       talentGolden: [],
-    }
+    },
   };
 
   const buildId = await upsert(newBuild);
@@ -117,7 +149,12 @@ const savedBuilds: Ref<Build[]> = useObservable(liveQuery(async () => list()));
 
 async function importCollection() {
   if (!collectionImportString.value || collectionImportString.value.length === 0) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import cards collection (provided value is empty)', life: 3000 });
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to import cards collection (provided value is empty)',
+      life: 3000,
+    });
     return;
   }
 
@@ -125,10 +162,20 @@ async function importCollection() {
     const parsed = JSON.parse(collectionImportString.value);
 
     await replaceCollection(parsed);
-    toast.add({ severity: 'success', summary: 'Done', detail: 'Successfully imported your cards collection', life: 3000 });
+    toast.add({
+      severity: 'success',
+      summary: 'Done',
+      detail: 'Successfully imported your cards collection',
+      life: 3000,
+    });
   } catch (e) {
     console.log(`collection import error: {e}`);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import cards collection (parsing error)', life: 3000 });
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to import cards collection (parsing error)',
+      life: 3000,
+    });
   } finally {
     isImportDialogVisible.value = false;
   }
@@ -147,12 +194,12 @@ async function importCollection() {
   flex-grow: 2;
 }
 
-#skills>div.lists {
+#skills > div.lists {
   display: flex;
   flex-grow: 1;
 }
 
-#skills>div.search-container input {
+#skills > div.search-container input {
   min-width: 500px;
 }
 

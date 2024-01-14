@@ -1,13 +1,13 @@
 export type Spell = {
   spellId: number;
   spellName: string;
-  description: string
-}
+  description: string;
+};
 
 export type CollectedCard = {
   cardId: number;
   rank: number;
-}
+};
 
 export enum CardType {
   AbilityNormal = 'ABILITY_NORMAL',
@@ -22,8 +22,8 @@ export enum CardFamily {
 }
 
 export type CardCollection = {
-  abilityNormal: CollectedCard[],
-  abilityGolden: CollectedCard[],
-  talentNormal: CollectedCard[],
-  talentGolden: CollectedCard[],
-}
+  abilityNormal: CollectedCard[];
+  abilityGolden: CollectedCard[];
+  talentNormal: CollectedCard[];
+  talentGolden: CollectedCard[];
+};
