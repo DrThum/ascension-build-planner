@@ -82,7 +82,7 @@ import Menu from 'primevue/menu';
 import { useStaticStore } from '@/stores/static';
 import { computed, ref, defineModel, type ModelRef } from 'vue';
 
-import { type CardFamily } from '@/types/cards.types';
+import { CardFamily } from '@/types/cards.types';
 
 const staticStore = useStaticStore();
 
