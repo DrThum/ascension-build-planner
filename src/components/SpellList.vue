@@ -17,14 +17,15 @@
     <ul class="spells-list">
       <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
         <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
-        <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded />
+        <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded
+          @click="removeSpell(spell?.spellId)" />
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
+import _, { remove } from 'lodash';
 import type { Spell } from '../types/cards.types'
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
 import Button from 'primevue/button'
@@ -71,6 +72,13 @@ function qualityToCssClass(quality?: string) {
     case "SKILL_CARD_EPIC": return 'quality-epic';
     case "SKILL_CARD_LEGENDARY": return 'quality-legendary';
     default: return '';
+  }
+}
+
+function removeSpell(removedSpellId?: Number) {
+  if (removedSpellId) {
+    const index = spellIds.value!.indexOf(removedSpellId);
+    spellIds.value!.splice(index, 1);
   }
 }
 </script>
