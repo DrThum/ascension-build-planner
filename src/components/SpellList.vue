@@ -16,8 +16,8 @@
 
     <ul class="spells-list">
       <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
-        {{ spell.spellName }}
-        <Button icon="pi pi-trash" severity="secondary" text rounded />
+        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+        <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded />
       </li>
     </ul>
   </div>
@@ -62,7 +62,7 @@ function spellSelected(ev: AutoCompleteItemSelectEvent) {
   search.value = '';
 };
 
-function qualityToCssClass(quality: string) {
+function qualityToCssClass(quality?: string) {
   switch (quality) {
     case "SKILL_CARD_POOR": return 'quality-poor';
     case "SKILL_CARD_COMMON": return 'quality-common';
@@ -91,18 +91,22 @@ function qualityToCssClass(quality: string) {
 
 ul.spells-list {
   padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 ul.spells-list li {
-  border: solid 1px lightgrey;
+  border: solid 2px lightgrey;
   border-radius: 8px;
-  margin: 8px 0;
-  padding: 10px;
+  margin: 8px 5px 8px 0;
+  padding: 5px;
   list-style: none;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  font-weight: bold;
 }
 
 ul.spells-list li.quality-poor {
@@ -127,5 +131,13 @@ ul.spells-list li.quality-epic {
 
 ul.spells-list li.quality-legendary {
   border-color: #ff8000;
+}
+
+ul.spells-list li button[role="remove-spell"] {
+  visibility: hidden;
+}
+
+ul.spells-list li:hover button[role="remove-spell"] {
+  visibility: visible;
 }
 </style>

@@ -47,7 +47,6 @@ const selectedBuildId = ref(0);
 const newBuildName = ref('');
 
 function loadBuild() {
-  console.log('loadBuild', savedBuilds.value.find((sb) => sb.id === selectedBuildId.value));
   Object.assign(currentBuild, savedBuilds.value.find((sb) => sb.id === selectedBuildId.value));
 }
 
