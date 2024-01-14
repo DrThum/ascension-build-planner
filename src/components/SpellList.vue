@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import _, { remove } from 'lodash';
+import _ from 'lodash';
 import type { Spell } from '../types/cards.types'
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
 import Button from 'primevue/button'
