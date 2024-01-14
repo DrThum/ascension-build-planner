@@ -2,6 +2,21 @@
   <div class="spell-list-container">
     <h2>{{ title }}</h2>
 
+    <h3>Card slots</h3>
+
+    <ul class="spells-list">
+      <li v-for="spell in cardedNormalAsSpells" :class="qualityToCssClass(spell?.quality)">
+        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+      </li>
+    </ul>
+
+    <ul class="spells-list">
+      <li v-for="spell in cardedGoldenAsSpells" :class="qualityToCssClass(spell?.quality)" class="golden">
+        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+      </li>
+    </ul>
+
+    <h3>All {{ title?.toLowerCase() }}</h3>
     <AutoComplete v-model="search" :suggestions="searchResults" optionLabel="spellName" @complete="performSearch"
       @item-select="spellSelected" scrollHeight="500px" :placeholder="`Search ${props.title}`">
       <template #option="slotProps">
@@ -17,8 +32,15 @@
     <ul class="spells-list">
       <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
         <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
-        <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded
-          @click="removeSpell(spell?.spellId)" />
+        <div>
+          <Button icon="pi pi-credit-card" severity="secondary" text rounded
+            @click="toggleMenu(spell?.spellId, $event)" />
+          <Menu :ref="(el) => (slotCardMenuRefs[spell!.spellId] = el)"
+            :model="[{ label: 'Slot as normal', command: () => slotCard(spell!.spellId, false) }, { label: 'Slot as golden', command: () => slotCard(spell!.spellId, true) }]"
+            :popup="true" />
+          <Button icon="pi pi-trash" role="remove-spell" severity="secondary" text rounded
+            @click="removeSpell(spell?.spellId)" />
+        </div>
       </li>
     </ul>
   </div>
@@ -29,12 +51,17 @@ import _ from 'lodash';
 import type { Spell } from '../types/cards.types'
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete'
 import Button from 'primevue/button'
+import Menu from 'primevue/menu'
 import { useStaticStore } from '@/stores/static'
 import { computed, ref, defineModel, type ModelRef } from 'vue'
 
 const staticStore = useStaticStore()
 
 const spellIds: ModelRef<Number[] | undefined, string> = defineModel();
+const cardedNormal = defineModel('cardSlotsNormal');
+const cardedGolden = defineModel('cardSlotsGolden');
+
+const slotCardMenuRefs = ref({});
 
 const props = defineProps({ title: String, type: String /* TODO enum */ })
 
@@ -55,7 +82,22 @@ function performSearch() {
 const spells = computed(() => {
   const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
 
+  // TODO: Move the ability to get a spell by ID to the static store
   return spellIds.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
+})
+
+const cardedNormalAsSpells = computed(() => {
+  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+
+  return cardedNormal.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
+
+})
+
+const cardedGoldenAsSpells = computed(() => {
+  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+
+  return cardedGolden.value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId)).filter((spell) => spell !== undefined);
+
 })
 
 function spellSelected(ev: AutoCompleteItemSelectEvent) {
@@ -79,6 +121,28 @@ function removeSpell(removedSpellId?: Number) {
   if (removedSpellId) {
     const index = spellIds.value!.indexOf(removedSpellId);
     spellIds.value!.splice(index, 1);
+  }
+}
+
+function toggleMenu(spellId?: number, event) {
+  slotCardMenuRefs.value[spellId!].toggle(event);
+}
+
+function slotCard(spellId?: number, isGolden: boolean) {
+  if (isGolden) {
+    if (cardedGolden.value.includes(spellId)) {
+      const index = cardedGolden.value.indexOf(spellId);
+      cardedGolden.value.splice(index, 1);
+    } else {
+      cardedGolden.value.push(spellId!);
+    }
+  } else {
+    if (cardedNormal.value.includes(spellId)) {
+      const index = cardedNormal.value.indexOf(spellId);
+      cardedNormal.value.splice(index, 1);
+    } else {
+      cardedNormal.value.push(spellId!);
+    }
   }
 }
 </script>
@@ -141,11 +205,15 @@ ul.spells-list li.quality-legendary {
   border-color: #ff8000;
 }
 
-ul.spells-list li button[role="remove-spell"] {
+ul.spells-list li.golden {
+  color: #ede944;
+}
+
+/*ul.spells-list li button[role="remove-spell"] {
   visibility: hidden;
 }
 
 ul.spells-list li:hover button[role="remove-spell"] {
   visibility: visible;
-}
+}*/
 </style>

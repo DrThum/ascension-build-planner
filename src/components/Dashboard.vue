@@ -16,8 +16,12 @@
     <div id="skills-and-groups">
       <div id="skills">
         <div class="lists">
-          <SpellList title="Abilities" v-model="currentBuild.abilitiesCards" type="abilities" />
-          <SpellList title="Talents" v-model="currentBuild.talentsCards" type="talents" />
+          <SpellList title="Abilities" v-model="currentBuild.abilitiesCards"
+            v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormal"
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGolden" type="abilities" />
+          <SpellList title="Talents" v-model="currentBuild.talentsCards"
+            v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormal"
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGolden" type="talents" />
         </div>
       </div>
       <SpellGroupList />
@@ -28,6 +32,8 @@
       <Dropdown v-model="selectedBuildId" :options="savedBuilds" optionLabel="name" optionValue="id" />
       <Button icon="pi pi-folder-open" label="Load" iconPos="right" @click="loadBuild" />
       <hr />
+    </div>
+    <div>
       <InputText type="text" v-model="newBuildName" />
       <Button icon="pi pi-plus-circle" iconPos="right" label="Create" @click="create" />
     </div>
@@ -94,7 +100,13 @@ async function create() {
     id: undefined,
     name: newBuildName.value,
     abilitiesCards: [],
-    talentsCards: []
+    talentsCards: [],
+    cardedSetup: {
+      abilityNormal: [],
+      abilityGolden: [],
+      talentNormal: [],
+      talentGolden: [],
+    }
   };
 
   const buildId = await upsert(newBuild);
@@ -115,7 +127,7 @@ async function importCollection() {
     await replaceCollection(parsed);
     toast.add({ severity: 'success', summary: 'Done', detail: 'Successfully imported your cards collection', life: 3000 });
   } catch (e) {
-    console.log(e);
+    console.log(`collection import error: {e}`);
     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import cards collection (parsing error)', life: 3000 });
   } finally {
     isImportDialogVisible.value = false;
