@@ -1,9 +1,16 @@
 <template>
+  <Toast />
   <header v-if="currentBuild && currentBuild.name">
-    <InputText type="text" v-model="currentBuild.name" />
-    <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
-    <Button icon="pi pi-times" iconPos="right" label="Close" severity="secondary" @click="closeBuild" />
-    <Button icon="pi pi-trash" iconPos="right" label="Delete" severity="danger" @click="deleteBuild" />
+    <div>
+      <InputText type="text" v-model="currentBuild.name" />
+      <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
+      <Button icon="pi pi-times" iconPos="right" label="Close" severity="secondary" @click="closeBuild" />
+      <Button icon="pi pi-trash" iconPos="right" label="Delete" severity="danger" @click="deleteBuild" />
+    </div>
+    <div>
+      <Button icon="pi pi-folder-open" iconPos="right" label="Import cards collection"
+        @click="isImportDialogVisible = true" />
+    </div>
   </header>
   <main v-if="currentBuild && currentBuild.name">
     <div id="skills-and-groups">
@@ -25,18 +32,30 @@
       <Button icon="pi pi-plus-circle" iconPos="right" label="Create" @click="create" />
     </div>
   </main>
+
+  <Dialog v-model:visible="isImportDialogVisible" modal>
+    <TextArea v-model="collectionImportString" rows="5" cols="100" />
+    <template #footer>
+      <Button label="Import" icon="pi pi-check" @click="importCollection" />
+    </template>
+  </Dialog>
 </template>
 
 <script setup async lang="ts">
 import { ref, type Ref, reactive, toRaw } from 'vue'
 
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
+import TextArea from 'primevue/textarea'
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 import SpellGroupList from './SpellGroupList.vue'
 import SpellList from './SpellList.vue'
 import { deleteById, upsert, list } from '@/services/build.service'
+import { replaceCollection } from '@/services/collection.service'
 import type { Build } from '@/types/build.types';
 
 import { useObservable } from '@vueuse/rxjs'
@@ -45,6 +64,10 @@ import { liveQuery } from 'dexie'
 const currentBuild = reactive({} as Build)
 const selectedBuildId = ref(0);
 const newBuildName = ref('');
+const isImportDialogVisible = ref(false);
+const collectionImportString = ref('');
+
+const toast = useToast();
 
 function loadBuild() {
   Object.assign(currentBuild, savedBuilds.value.find((sb) => sb.id === selectedBuildId.value));
@@ -79,6 +102,25 @@ async function create() {
 }
 
 const savedBuilds: Ref<Build[]> = useObservable(liveQuery(async () => list()));
+
+async function importCollection() {
+  if (!collectionImportString.value || collectionImportString.value.length === 0) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import cards collection (provided value is empty)', life: 3000 });
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(collectionImportString.value);
+
+    await replaceCollection(parsed);
+    toast.add({ severity: 'success', summary: 'Done', detail: 'Successfully imported your cards collection', life: 3000 });
+  } catch (e) {
+    console.log(e);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import cards collection (parsing error)', life: 3000 });
+  } finally {
+    isImportDialogVisible.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -100,6 +142,11 @@ const savedBuilds: Ref<Build[]> = useObservable(liveQuery(async () => list()));
 
 #skills>div.search-container input {
   min-width: 500px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
 }
 
 main.no-build {
