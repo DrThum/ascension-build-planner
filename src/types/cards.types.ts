@@ -16,6 +16,11 @@ export enum CardType {
   TalentGolden = 'TALENT_GOLDEN',
 }
 
+export enum CardFamily {
+  Ability = 'ABILITY',
+  Talent = 'TALENT',
+}
+
 export type CardCollection = {
   abilityNormal: CollectedCard[],
   abilityGolden: CollectedCard[],

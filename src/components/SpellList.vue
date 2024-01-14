@@ -55,6 +55,8 @@ import Menu from 'primevue/menu'
 import { useStaticStore } from '@/stores/static'
 import { computed, ref, defineModel, type ModelRef } from 'vue'
 
+import { type CardFamily } from '@/types/cards.types'
+
 const staticStore = useStaticStore()
 
 const spellIds: ModelRef<Number[] | undefined, string> = defineModel();
@@ -63,7 +65,7 @@ const cardedGolden = defineModel('cardSlotsGolden');
 
 const slotCardMenuRefs = ref({});
 
-const props = defineProps({ title: String, type: String /* TODO enum */ })
+const props = defineProps({ title: String, type: CardFamily })
 
 const search = ref('')
 const searchResults = ref([] as Array<Spell>)
@@ -124,7 +126,7 @@ function removeSpell(removedSpellId?: Number) {
   }
 }
 
-function toggleMenu(spellId?: number, event) {
+function toggleMenu(spellId: number, event: Event) {
   slotCardMenuRefs.value[spellId!].toggle(event);
 }
 
