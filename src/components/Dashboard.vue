@@ -34,17 +34,17 @@
         <div class="lists">
           <SpellList
             title="Abilities"
-            v-model="currentBuild.abilitiesCards"
-            v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormal"
-            v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGolden"
-            type="abilities"
+            v-model="currentBuild.abilityCardIds"
+            v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormalIds"
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGoldenIds"
+            :card-category="CardCategory.Ability"
           />
           <SpellList
             title="Talents"
-            v-model="currentBuild.talentsCards"
-            v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormal"
-            v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGolden"
-            type="talents"
+            v-model="currentBuild.talentCardIds"
+            v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormalIds"
+            v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGoldenIds"
+            :card-category="CardCategory.Talent"
           />
         </div>
       </div>
@@ -93,8 +93,9 @@ import { deleteById, upsert, list } from '@/services/build.service';
 import { replaceCollection } from '@/services/collection.service';
 import type { Build } from '@/types/build.types';
 
-import { useObservable } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
+import { CardCategory } from '@/types/cards.types';
+import { useObservable, from } from '@vueuse/rxjs';
 
 const currentBuild = reactive({} as Build);
 const selectedBuildId = ref(0);
@@ -118,12 +119,15 @@ async function saveBuild() {
 
 function closeBuild() {
   for (const prop in currentBuild) {
-    delete currentBuild[prop];
+    delete currentBuild[prop as keyof Build];
   }
 }
 
 async function deleteBuild() {
-  await deleteById(currentBuild.id);
+  if (currentBuild.id) {
+    await deleteById(currentBuild.id);
+  }
+
   closeBuild();
 }
 
@@ -131,13 +135,13 @@ async function create() {
   const newBuild: Build = {
     id: undefined,
     name: newBuildName.value,
-    abilitiesCards: [],
-    talentsCards: [],
+    abilityCardIds: [],
+    talentCardIds: [],
     cardedSetup: {
-      abilityNormal: [],
-      abilityGolden: [],
-      talentNormal: [],
-      talentGolden: [],
+      abilityNormalIds: [],
+      abilityGoldenIds: [],
+      talentNormalIds: [],
+      talentGoldenIds: [],
     },
   };
 
@@ -145,7 +149,7 @@ async function create() {
   selectedBuildId.value = buildId;
 }
 
-const savedBuilds: Ref<Build[]> = useObservable(liveQuery(async () => list()));
+const savedBuilds: Ref<Build[]> = useObservable(from(liveQuery(async () => list())));
 
 async function importCollection() {
   if (!collectionImportString.value || collectionImportString.value.length === 0) {

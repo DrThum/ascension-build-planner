@@ -5,22 +5,22 @@
     <h3>Card slots</h3>
 
     <ul class="spells-list">
-      <li v-for="spell in cardedNormalAsSpells" :class="qualityToCssClass(spell?.quality)">
-        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+      <li v-for="card in cardedNormalAsSpells" :class="qualityToCssClass(card.quality)">
+        <span v-tooltip.left="card.description">{{ card.spellName }}</span>
       </li>
     </ul>
 
     <ul class="spells-list">
       <li
         v-for="spell in cardedGoldenAsSpells"
-        :class="qualityToCssClass(spell?.quality)"
+        :class="qualityToCssClass(spell.quality)"
         class="golden"
       >
-        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+        <span v-tooltip.left="spell.description">{{ spell.spellName }}</span>
       </li>
     </ul>
 
-    <h3>All {{ title?.toLowerCase() }}</h3>
+    <h3>All {{ title.toLowerCase() }}</h3>
     <AutoComplete
       v-model="search"
       :suggestions="searchResults"
@@ -41,18 +41,18 @@
     </AutoComplete>
 
     <ul class="spells-list">
-      <li v-for="spell in spells" :class="qualityToCssClass(spell?.quality)">
-        <span v-tooltip.left="spell?.description">{{ spell?.spellName }}</span>
+      <li v-for="spell in spells" :class="qualityToCssClass(spell.quality)">
+        <span v-tooltip.left="spell.description">{{ spell.spellName }}</span>
         <div>
           <Button
             icon="pi pi-credit-card"
             severity="secondary"
             text
             rounded
-            @click="toggleMenu(spell?.spellId, $event)"
+            @click="toggleMenu(spell.spellId, $event)"
           />
           <Menu
-            :ref="(el) => (slotCardMenuRefs[spell!.spellId] = el)"
+            :ref="(el) => (slotCardMenuRefs[spell.spellId] = el)"
             :model="[
               { label: 'Slot as normal', command: () => slotCard(spell!.spellId, false) },
               { label: 'Slot as golden', command: () => slotCard(spell!.spellId, true) },
@@ -65,7 +65,7 @@
             severity="secondary"
             text
             rounded
-            @click="removeSpell(spell?.spellId)"
+            @click="removeSpell(spell.spellId)"
           />
         </div>
       </li>
@@ -75,30 +75,39 @@
 
 <script setup lang="ts">
 import _ from 'lodash';
-import type { Spell } from '../types/cards.types';
+import { CardQuality, type Card } from '../types/cards.types';
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menu from 'primevue/menu';
 import { useStaticStore } from '@/stores/static';
-import { computed, ref, defineModel, type ModelRef } from 'vue';
+import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
 
-import { CardFamily } from '@/types/cards.types';
+import { CardCategory } from '@/types/cards.types';
 
 const staticStore = useStaticStore();
 
-const spellIds: ModelRef<Number[] | undefined, string> = defineModel();
-const cardedNormal = defineModel('cardSlotsNormal');
-const cardedGolden = defineModel('cardSlotsGolden');
+const spellIds: Ref<number[]> = defineModel({ required: true });
+const cardedNormalIds: Ref<number[]> = defineModel('cardSlotsNormal', { required: true });
+const cardedGoldenIds: Ref<number[]> = defineModel('cardSlotsGolden', { required: true });
 
-const slotCardMenuRefs = ref({});
+const slotCardMenuRefs = ref({} as { [x: number]: any });
 
-const props = defineProps({ title: String, type: CardFamily });
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  cardCategory: {
+    type: Object as PropType<CardCategory>,
+    required: true,
+  },
+});
 
 const search = ref('');
-const searchResults = ref([] as Array<Spell>);
+const searchResults = ref([] as Array<Card>);
 
 const source = _.uniqBy(
-  props.type === 'abilities' ? staticStore.abilities : staticStore.talents,
+  props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents,
   (s) => s.cardId,
 );
 
@@ -114,28 +123,31 @@ function performSearch() {
 }
 
 const spells = computed(() => {
-  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+  const source =
+    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
 
   // TODO: Move the ability to get a spell by ID to the static store
   return spellIds
     .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
-    .filter((spell) => spell !== undefined);
+    .filter((spell) => spell !== undefined) as Card[];
 });
 
 const cardedNormalAsSpells = computed(() => {
-  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+  const source =
+    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
 
-  return cardedNormal
-    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
-    .filter((spell) => spell !== undefined);
+  return cardedNormalIds
+    .value!.map((spellId) => source.find((sourceCard) => sourceCard.spellId === spellId))
+    .filter((spell) => spell !== undefined) as Card[];
 });
 
 const cardedGoldenAsSpells = computed(() => {
-  const source = props.type === 'abilities' ? staticStore.abilities : staticStore.talents;
+  const source =
+    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
 
-  return cardedGolden
+  return cardedGoldenIds
     .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
-    .filter((spell) => spell !== undefined);
+    .filter((spell) => spell !== undefined) as Card[];
 });
 
 function spellSelected(ev: AutoCompleteItemSelectEvent) {
@@ -143,26 +155,24 @@ function spellSelected(ev: AutoCompleteItemSelectEvent) {
   search.value = '';
 }
 
-function qualityToCssClass(quality?: string) {
+function qualityToCssClass(quality: CardQuality) {
   switch (quality) {
-    case 'SKILL_CARD_POOR':
-      return 'quality-poor';
-    case 'SKILL_CARD_COMMON':
+    case CardQuality.Common:
       return 'quality-common';
-    case 'SKILL_CARD_UNCOMMON':
+    case CardQuality.Uncommon:
       return 'quality-uncommon';
-    case 'SKILL_CARD_RARE':
+    case CardQuality.Rare:
       return 'quality-rare';
-    case 'SKILL_CARD_EPIC':
+    case CardQuality.Epic:
       return 'quality-epic';
-    case 'SKILL_CARD_LEGENDARY':
+    case CardQuality.Legendary:
       return 'quality-legendary';
     default:
-      return '';
+      throw new Error(`unexpected card quality ${quality}`);
   }
 }
 
-function removeSpell(removedSpellId?: Number) {
+function removeSpell(removedSpellId?: number) {
   if (removedSpellId) {
     const index = spellIds.value!.indexOf(removedSpellId);
     spellIds.value!.splice(index, 1);
@@ -173,20 +183,20 @@ function toggleMenu(spellId: number, event: Event) {
   slotCardMenuRefs.value[spellId!].toggle(event);
 }
 
-function slotCard(spellId?: number, isGolden: boolean) {
+function slotCard(spellId: number, isGolden: boolean) {
   if (isGolden) {
-    if (cardedGolden.value.includes(spellId)) {
-      const index = cardedGolden.value.indexOf(spellId);
-      cardedGolden.value.splice(index, 1);
+    if (cardedGoldenIds.value.includes(spellId)) {
+      const index = cardedGoldenIds.value.indexOf(spellId);
+      cardedGoldenIds.value.splice(index, 1);
     } else {
-      cardedGolden.value.push(spellId!);
+      cardedGoldenIds.value.push(spellId!);
     }
   } else {
-    if (cardedNormal.value.includes(spellId)) {
-      const index = cardedNormal.value.indexOf(spellId);
-      cardedNormal.value.splice(index, 1);
+    if (cardedNormalIds.value.includes(spellId)) {
+      const index = cardedNormalIds.value.indexOf(spellId);
+      cardedNormalIds.value.splice(index, 1);
     } else {
-      cardedNormal.value.push(spellId!);
+      cardedNormalIds.value.push(spellId!);
     }
   }
 }
@@ -224,10 +234,6 @@ ul.spells-list li {
   align-items: center;
 
   font-weight: bold;
-}
-
-ul.spells-list li.quality-poor {
-  border-color: #9d9d9d;
 }
 
 ul.spells-list li.quality-common {

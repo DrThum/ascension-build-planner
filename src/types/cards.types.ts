@@ -1,7 +1,11 @@
-export type Spell = {
+export type Card = {
   spellId: number;
   spellName: string;
   description: string;
+  cardId: number;
+  quality: CardQuality;
+  rank: number;
+  maxRank: number;
 };
 
 export type CollectedCard = {
@@ -16,7 +20,15 @@ export enum CardType {
   TalentGolden = 'TALENT_GOLDEN',
 }
 
-export enum CardFamily {
+export enum CardQuality {
+  Uncommon = 'SKILL_CARD_UNCOMMON',
+  Common = 'SKILL_CARD_COMMON',
+  Rare = 'SKILL_CARD_RARE',
+  Epic = 'SKILL_CARD_EPIC',
+  Legendary = 'SKILL_CARD_LEGENDARY',
+}
+
+export enum CardCategory {
   Ability = 'ABILITY',
   Talent = 'TALENT',
 }

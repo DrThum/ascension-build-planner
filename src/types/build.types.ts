@@ -1,12 +1,12 @@
 export type Build = {
   id: number | undefined;
   name: string;
-  abilitiesCards: number[];
-  talentsCards: number[];
+  abilityCardIds: number[];
+  talentCardIds: number[];
   cardedSetup: {
-    abilityNormal: number[]; // Max 2
-    abilityGolden: number[]; // Max 2
-    talentNormal: number[]; // Max 3
-    talentGolden: number[]; // Max 3
+    abilityNormalIds: number[]; // Max 2
+    abilityGoldenIds: number[]; // Max 2
+    talentNormalIds: number[]; // Max 3
+    talentGoldenIds: number[]; // Max 3
   };
 };
