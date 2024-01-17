@@ -6,8 +6,11 @@
 
     <ul class="cards-list">
       <li v-for="card in cardedNormalAsSpells" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span
-        ><!-- FIXME: use appropriate spell rank here -->
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false).description"
+          >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, false) }}/{{
+            card.maxRank
+          }})</span
+        >
       </li>
     </ul>
 
@@ -17,8 +20,11 @@
         :class="qualityToCssClass(card.quality)"
         class="golden"
       >
-        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span
-        ><!-- FIXME: use appropriate spell rank here -->
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, true).description"
+          >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, true) }}/{{
+            card.maxRank
+          }})</span
+        >
       </li>
     </ul>
 
@@ -44,8 +50,9 @@
 
     <ul class="cards-list">
       <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span>
-        <!-- FIXME: use appropriate spell rank here -->
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false, card.maxRank)">{{
+          card.spells[0].name
+        }}</span>
         <div>
           <Button
             icon="pi pi-credit-card"
@@ -82,12 +89,12 @@ import { CardQuality, type Card } from '../types/cards.types';
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menu from 'primevue/menu';
-import { useStaticStore } from '@/stores/static';
+import { useCardsStore } from '@/stores/cards';
 import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
 
 import { CardCategory } from '@/types/cards.types';
 
-const staticStore = useStaticStore();
+const cardsStore = useCardsStore();
 
 const cardIds: Ref<number[]> = defineModel({ required: true });
 const cardedNormalIds: Ref<number[]> = defineModel('cardSlotsNormal', { required: true });
@@ -110,7 +117,7 @@ const search = ref('');
 const searchResults = ref([] as Array<Card>);
 
 const dataSource =
-  props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
+  props.cardCategory === CardCategory.Ability ? cardsStore.abilities : cardsStore.talents;
 
 function performSearch() {
   searchResults.value = dataSource.filter((card) => {

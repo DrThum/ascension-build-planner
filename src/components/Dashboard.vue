@@ -48,7 +48,8 @@
           />
         </div>
       </div>
-      <CardGroupList />
+      <!-- Disabled for now -->
+      <CardGroupList v-if="false" />
     </div>
   </main>
   <main v-else class="no-build">
@@ -77,7 +78,7 @@
 </template>
 
 <script setup async lang="ts">
-import { ref, type Ref, reactive, toRaw } from 'vue';
+import { ref, type Ref, reactive, toRaw, onBeforeMount } from 'vue';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -90,8 +91,10 @@ import { useToast } from 'primevue/usetoast';
 import CardGroupList from './CardGroupList.vue';
 import CardList from './CardList.vue';
 import { deleteById, upsert, list } from '@/services/build.service';
-import { replaceCollection } from '@/services/collection.service';
+import { getCollection, replaceCollection } from '@/services/collection.service';
 import type { Build } from '@/types/build.types';
+
+import { useCardsStore } from '@/stores/cards';
 
 import { liveQuery } from 'dexie';
 import { CardCategory } from '@/types/cards.types';
@@ -102,6 +105,7 @@ const selectedBuildId = ref(0);
 const newBuildName = ref('');
 const isImportDialogVisible = ref(false);
 const collectionImportString = ref('');
+const cardsStore = useCardsStore();
 
 const toast = useToast();
 
@@ -149,6 +153,11 @@ async function create() {
   selectedBuildId.value = buildId;
 }
 
+onBeforeMount(async () => {
+  const collection = await getCollection();
+  cardsStore.setCollection(collection);
+});
+
 const savedBuilds: Ref<Build[]> = useObservable(from(liveQuery(async () => list())));
 
 async function importCollection() {
@@ -164,6 +173,8 @@ async function importCollection() {
 
   try {
     const parsed = JSON.parse(collectionImportString.value);
+
+    cardsStore.setCollection(parsed);
 
     await replaceCollection(parsed);
     toast.add({
