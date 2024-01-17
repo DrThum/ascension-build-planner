@@ -1,11 +1,15 @@
 export type Card = {
-  spellId: number;
-  spellName: string;
-  description: string;
   cardId: number;
   quality: CardQuality;
-  rank: number;
   maxRank: number;
+  spells: Spell[];
+};
+
+export type Spell = {
+  id: number;
+  name: string;
+  description: string;
+  rank: number;
 };
 
 export type CollectedCard = {

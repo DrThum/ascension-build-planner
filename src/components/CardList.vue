@@ -1,22 +1,24 @@
 <template>
-  <div class="spell-list-container">
+  <div class="card-list-container">
     <h2>{{ title }}</h2>
 
     <h3>Card slots</h3>
 
-    <ul class="spells-list">
+    <ul class="cards-list">
       <li v-for="card in cardedNormalAsSpells" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="card.description">{{ card.spellName }}</span>
+        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span
+        ><!-- FIXME: use appropriate spell rank here -->
       </li>
     </ul>
 
-    <ul class="spells-list">
+    <ul class="cards-list">
       <li
-        v-for="spell in cardedGoldenAsSpells"
-        :class="qualityToCssClass(spell.quality)"
+        v-for="card in cardedGoldenAsSpells"
+        :class="qualityToCssClass(card.quality)"
         class="golden"
       >
-        <span v-tooltip.left="spell.description">{{ spell.spellName }}</span>
+        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span
+        ><!-- FIXME: use appropriate spell rank here -->
       </li>
     </ul>
 
@@ -24,9 +26,9 @@
     <AutoComplete
       v-model="search"
       :suggestions="searchResults"
-      optionLabel="spellName"
+      optionLabel="FIXME"
       @complete="performSearch"
-      @item-select="spellSelected"
+      @item-select="cardSelected"
       scrollHeight="500px"
       :placeholder="`Search ${props.title}`"
     >
@@ -40,22 +42,23 @@
       </template>
     </AutoComplete>
 
-    <ul class="spells-list">
-      <li v-for="spell in spells" :class="qualityToCssClass(spell.quality)">
-        <span v-tooltip.left="spell.description">{{ spell.spellName }}</span>
+    <ul class="cards-list">
+      <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
+        <span v-tooltip.left="card.spells[0].description">{{ card.spells[0].name }}</span>
+        <!-- FIXME: use appropriate spell rank here -->
         <div>
           <Button
             icon="pi pi-credit-card"
             severity="secondary"
             text
             rounded
-            @click="toggleMenu(spell.spellId, $event)"
+            @click="toggleMenu(card.cardId, $event)"
           />
           <Menu
-            :ref="(el) => (slotCardMenuRefs[spell.spellId] = el)"
+            :ref="(el) => (slotCardMenuRefs[card.cardId] = el)"
             :model="[
-              { label: 'Slot as normal', command: () => slotCard(spell!.spellId, false) },
-              { label: 'Slot as golden', command: () => slotCard(spell!.spellId, true) },
+              { label: 'Slot as normal', command: () => slotCard(card.cardId, false) },
+              { label: 'Slot as golden', command: () => slotCard(card.cardId, true) },
             ]"
             :popup="true"
           />
@@ -65,7 +68,7 @@
             severity="secondary"
             text
             rounded
-            @click="removeSpell(spell.spellId)"
+            @click="removeSpell(card.cardId)"
           />
         </div>
       </li>
@@ -86,7 +89,7 @@ import { CardCategory } from '@/types/cards.types';
 
 const staticStore = useStaticStore();
 
-const spellIds: Ref<number[]> = defineModel({ required: true });
+const cardIds: Ref<number[]> = defineModel({ required: true });
 const cardedNormalIds: Ref<number[]> = defineModel('cardSlotsNormal', { required: true });
 const cardedGoldenIds: Ref<number[]> = defineModel('cardSlotsGolden', { required: true });
 
@@ -98,7 +101,7 @@ const props = defineProps({
     required: true,
   },
   cardCategory: {
-    type: Object as PropType<CardCategory>,
+    type: String as PropType<CardCategory>,
     required: true,
   },
 });
@@ -106,52 +109,44 @@ const props = defineProps({
 const search = ref('');
 const searchResults = ref([] as Array<Card>);
 
-const source = _.uniqBy(
-  props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents,
-  (s) => s.cardId,
-);
+const dataSource =
+  props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
 
 function performSearch() {
-  searchResults.value = source.filter((spellId) => {
-    const spellAlreadyChosen = spells.value.includes(spellId);
-    const spellNameOrDescriptionMatches = `${spellId.spellName} ${spellId.description}`
+  searchResults.value = dataSource.filter((card) => {
+    const cardAlreadyChosen = cards.value.find((c) => c.cardId) !== undefined;
+    const allSpellNamesAndDescr = card.spells
+      .map((spell) => `${spell.name} ${spell.description}`)
+      .join('\n');
+    const spellNameOrDescriptionMatches = allSpellNamesAndDescr
       .toLowerCase()
       .includes(search.value.toLowerCase());
 
-    return !spellAlreadyChosen && spellNameOrDescriptionMatches;
+    return !cardAlreadyChosen && spellNameOrDescriptionMatches;
   });
 }
 
-const spells = computed(() => {
-  const source =
-    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
-
+const cards = computed(() => {
   // TODO: Move the ability to get a spell by ID to the static store
-  return spellIds
-    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
-    .filter((spell) => spell !== undefined) as Card[];
+  return cardIds
+    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
+    .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedNormalAsSpells = computed(() => {
-  const source =
-    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
-
   return cardedNormalIds
-    .value!.map((spellId) => source.find((sourceCard) => sourceCard.spellId === spellId))
+    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((spell) => spell !== undefined) as Card[];
 });
 
 const cardedGoldenAsSpells = computed(() => {
-  const source =
-    props.cardCategory === CardCategory.Ability ? staticStore.abilities : staticStore.talents;
-
   return cardedGoldenIds
-    .value!.map((spellId) => source.find((sourceSpell) => sourceSpell.spellId === spellId))
+    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((spell) => spell !== undefined) as Card[];
 });
 
-function spellSelected(ev: AutoCompleteItemSelectEvent) {
-  spellIds.value!.push(ev.value.spellId);
+function cardSelected(ev: AutoCompleteItemSelectEvent) {
+  cardIds.value!.push(ev.value.cardId);
   search.value = '';
 }
 
@@ -174,8 +169,8 @@ function qualityToCssClass(quality: CardQuality) {
 
 function removeSpell(removedSpellId?: number) {
   if (removedSpellId) {
-    const index = spellIds.value!.indexOf(removedSpellId);
-    spellIds.value!.splice(index, 1);
+    const index = cardIds.value!.indexOf(removedSpellId);
+    cardIds.value!.splice(index, 1);
   }
 }
 
@@ -203,7 +198,7 @@ function slotCard(spellId: number, isGolden: boolean) {
 </script>
 
 <style>
-.spell-list-container {
+.card-list-container {
   flex-grow: 1;
   margin-right: 10px;
 }
@@ -216,13 +211,13 @@ function slotCard(spellId: number, isGolden: boolean) {
   font-weight: bold;
 }
 
-ul.spells-list {
+ul.cards-list {
   padding-left: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
 
-ul.spells-list li {
+ul.cards-list li {
   border: solid 2px lightgrey;
   border-radius: 8px;
   margin: 8px 5px 8px 0;
@@ -236,35 +231,27 @@ ul.spells-list li {
   font-weight: bold;
 }
 
-ul.spells-list li.quality-common {
+ul.cards-list li.quality-common {
   border-color: #ffffff;
 }
 
-ul.spells-list li.quality-uncommon {
+ul.cards-list li.quality-uncommon {
   border-color: #1eff00;
 }
 
-ul.spells-list li.quality-rare {
+ul.cards-list li.quality-rare {
   border-color: #0070dd;
 }
 
-ul.spells-list li.quality-epic {
+ul.cards-list li.quality-epic {
   border-color: #a335ee;
 }
 
-ul.spells-list li.quality-legendary {
+ul.cards-list li.quality-legendary {
   border-color: #ff8000;
 }
 
-ul.spells-list li.golden {
+ul.cards-list li.golden {
   color: #ede944;
 }
-
-/*ul.spells-list li button[role="remove-spell"] {
-  visibility: hidden;
-}
-
-ul.spells-list li:hover button[role="remove-spell"] {
-  visibility: visible;
-}*/
 </style>

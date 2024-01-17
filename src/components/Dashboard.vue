@@ -32,14 +32,14 @@
     <div id="skills-and-groups">
       <div id="skills">
         <div class="lists">
-          <SpellList
+          <CardList
             title="Abilities"
             v-model="currentBuild.abilityCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGoldenIds"
             :card-category="CardCategory.Ability"
           />
-          <SpellList
+          <CardList
             title="Talents"
             v-model="currentBuild.talentCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormalIds"
@@ -48,7 +48,7 @@
           />
         </div>
       </div>
-      <SpellGroupList />
+      <CardGroupList />
     </div>
   </main>
   <main v-else class="no-build">
@@ -87,8 +87,8 @@ import TextArea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 
-import SpellGroupList from './SpellGroupList.vue';
-import SpellList from './SpellList.vue';
+import CardGroupList from './CardGroupList.vue';
+import CardList from './CardList.vue';
 import { deleteById, upsert, list } from '@/services/build.service';
 import { replaceCollection } from '@/services/collection.service';
 import type { Build } from '@/types/build.types';
