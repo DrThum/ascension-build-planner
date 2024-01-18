@@ -34,6 +34,7 @@
         <div class="lists">
           <CardList
             title="Abilities"
+            :threshold="36"
             v-model="currentBuild.abilityCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGoldenIds"
@@ -41,6 +42,7 @@
           />
           <CardList
             title="Talents"
+            :threshold="51"
             v-model="currentBuild.talentCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGoldenIds"

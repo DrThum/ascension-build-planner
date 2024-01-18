@@ -7,24 +7,27 @@
     <ul class="cards-list">
       <li v-for="card in cardedNormal" :class="qualityToCssClass(card.quality)">
         <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false).description"
-          >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, false) }}/{{
-            card.maxRank
-          }})</span
+          >{{ card.spells[0].name }} (<span
+            :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, false) === 0 }"
+          >
+            {{ cardsStore.collectedRank(card.cardId, false) }}/{{ card.maxRank }} </span
+          >)</span
         >
       </li>
     </ul>
 
     <ul class="cards-list">
       <li v-for="card in cardedGolden" :class="qualityToCssClass(card.quality)" class="golden">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, true).description"
-          >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, true) }}/{{
-            card.maxRank
-          }})</span
-        >
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, true).description">
+          {{ card.spells[0].name }}
+          (<span :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, true) === 0 }">
+            {{ cardsStore.collectedRank(card.cardId, true) }}/{{ card.maxRank }} </span
+          >)
+        </span>
       </li>
     </ul>
 
-    <h3>All {{ title.toLowerCase() }}</h3>
+    <h3>All {{ title.toLowerCase() }} ({{ cardIds.length }}/{{ threshold }})</h3>
     <AutoComplete
       v-model="search"
       :suggestions="searchResults"
@@ -35,9 +38,11 @@
     >
       <template #option="slotProps">
         <div class="flex align-options-center">
-          <p class="result-title">{{ cardsStore.spellForCard(slotProps.option.cardId).name }}</p>
+          <p class="result-title">
+            {{ cardsStore.spellForCard(slotProps.option.cardId, false).name }}
+          </p>
           <p class="result-description" style="max-width: 500px; white-space: normal">
-            {{ cardsStore.spellForCard(slotProps.option.cardId).description }}
+            {{ cardsStore.spellForCard(slotProps.option.cardId, false).description }}
           </p>
         </div>
       </template>
@@ -104,6 +109,10 @@ const props = defineProps({
   },
   cardCategory: {
     type: String as PropType<CardCategory>,
+    required: true,
+  },
+  threshold: {
+    type: Number,
     required: true,
   },
 });
@@ -272,5 +281,9 @@ ul.cards-list li.quality-legendary {
 
 ul.cards-list li.golden {
   box-shadow: 0px 0px 15px 1px rgba(255, 234, 43, 1);
+}
+
+ul.cards-list .not-collected {
+  color: red;
 }
 </style>
