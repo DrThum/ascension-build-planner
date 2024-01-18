@@ -32,7 +32,6 @@
     <AutoComplete
       v-model="search"
       :suggestions="searchResults"
-      optionLabel="FIXME"
       @complete="performSearch"
       @item-select="cardSelected"
       scrollHeight="500px"
@@ -40,9 +39,9 @@
     >
       <template #option="slotProps">
         <div class="flex align-options-center">
-          <p class="result-title">{{ slotProps.option.spellName }}</p>
+          <p class="result-title">{{ cardsStore.spellForCard(slotProps.option.cardId).name }}</p>
           <p class="result-description" style="max-width: 500px; white-space: normal">
-            {{ slotProps.option.description }}
+            {{ cardsStore.spellForCard(slotProps.option.cardId).description }}
           </p>
         </div>
       </template>
