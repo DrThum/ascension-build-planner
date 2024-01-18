@@ -214,6 +214,11 @@ async function importCollection() {
   flex-grow: 1;
 }
 
+#skills > div.lists > .card-list-container {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
 #skills > div.search-container input {
   min-width: 500px;
 }
