@@ -54,7 +54,7 @@ export const useCardsStore = defineStore('cards', {
           ? state.collection.abilityGolden.concat(state.collection.talentGolden)
           : state.collection.abilityNormal.concat(state.collection.talentNormal);
 
-        return relevantCollectedCards.find((c) => c.cardId === cardId)?.rank ?? 1;
+        return relevantCollectedCards.find((c) => c.cardId === cardId)?.rank ?? 0;
       };
     },
   },
