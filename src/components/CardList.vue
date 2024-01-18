@@ -5,7 +5,7 @@
     <h3>Card slots</h3>
 
     <ul class="cards-list">
-      <li v-for="card in cardedNormalAsSpells" :class="qualityToCssClass(card.quality)">
+      <li v-for="card in cardedNormal" :class="qualityToCssClass(card.quality)">
         <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false).description"
           >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, false) }}/{{
             card.maxRank
@@ -15,11 +15,7 @@
     </ul>
 
     <ul class="cards-list">
-      <li
-        v-for="card in cardedGoldenAsSpells"
-        :class="qualityToCssClass(card.quality)"
-        class="golden"
-      >
+      <li v-for="card in cardedGolden" :class="qualityToCssClass(card.quality)" class="golden">
         <span v-tooltip.left="cardsStore.spellForCard(card.cardId, true).description"
           >{{ card.spells[0].name }} ({{ cardsStore.collectedRank(card.cardId, true) }}/{{
             card.maxRank
@@ -138,13 +134,13 @@ const cards = computed(() => {
     .filter((card) => card !== undefined) as Card[];
 });
 
-const cardedNormalAsSpells = computed(() => {
+const cardedNormal = computed(() => {
   return cardedNormalIds
     .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
-const cardedGoldenAsSpells = computed(() => {
+const cardedGolden = computed(() => {
   return cardedGoldenIds
     .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((card) => card !== undefined) as Card[];
