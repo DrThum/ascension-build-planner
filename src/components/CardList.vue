@@ -120,7 +120,7 @@ const dataSource =
 
 function performSearch() {
   searchResults.value = dataSource.filter((card) => {
-    const cardAlreadyChosen = cards.value.find((c) => c.cardId) !== undefined;
+    const cardAlreadyChosen = cardIds.value.includes(card.cardId);
     const allSpellNamesAndDescr = card.spells
       .map((spell) => `${spell.name} ${spell.description}`)
       .join('\n');
