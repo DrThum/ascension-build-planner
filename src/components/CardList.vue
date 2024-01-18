@@ -271,6 +271,6 @@ ul.cards-list li.quality-legendary {
 }
 
 ul.cards-list li.golden {
-  color: #ede944;
+  box-shadow: 0px 0px 15px 1px rgba(255, 234, 43, 1);
 }
 </style>
