@@ -74,7 +74,7 @@
             severity="secondary"
             text
             rounded
-            @click="removeSpell(card.cardId)"
+            @click="removeCard(card.cardId)"
           />
         </div>
       </li>
@@ -133,26 +133,25 @@ function performSearch() {
 }
 
 const cards = computed(() => {
-  // TODO: Move the ability to get a spell by ID to the static store
-  return cardIds
-    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
+  return cardIds.value
+    .map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedNormalAsSpells = computed(() => {
   return cardedNormalIds
     .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
-    .filter((spell) => spell !== undefined) as Card[];
+    .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedGoldenAsSpells = computed(() => {
   return cardedGoldenIds
     .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
-    .filter((spell) => spell !== undefined) as Card[];
+    .filter((card) => card !== undefined) as Card[];
 });
 
 function cardSelected(ev: AutoCompleteItemSelectEvent) {
-  cardIds.value!.push(ev.value.cardId);
+  cardIds.value.push(ev.value.cardId);
   search.value = '';
 }
 
@@ -173,31 +172,29 @@ function qualityToCssClass(quality: CardQuality) {
   }
 }
 
-function removeSpell(removedSpellId?: number) {
-  if (removedSpellId) {
-    const index = cardIds.value!.indexOf(removedSpellId);
-    cardIds.value!.splice(index, 1);
-  }
+function removeCard(removedCardId: number) {
+  const index = cardIds.value.indexOf(removedCardId);
+  cardIds.value.splice(index, 1);
 }
 
-function toggleMenu(spellId: number, event: Event) {
-  slotCardMenuRefs.value[spellId!].toggle(event);
+function toggleMenu(cardId: number, event: Event) {
+  slotCardMenuRefs.value[cardId].toggle(event);
 }
 
-function slotCard(spellId: number, isGolden: boolean) {
+function slotCard(cardId: number, isGolden: boolean) {
   if (isGolden) {
-    if (cardedGoldenIds.value.includes(spellId)) {
-      const index = cardedGoldenIds.value.indexOf(spellId);
+    if (cardedGoldenIds.value.includes(cardId)) {
+      const index = cardedGoldenIds.value.indexOf(cardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
-      cardedGoldenIds.value.push(spellId!);
+      cardedGoldenIds.value.push(cardId);
     }
   } else {
-    if (cardedNormalIds.value.includes(spellId)) {
-      const index = cardedNormalIds.value.indexOf(spellId);
+    if (cardedNormalIds.value.includes(cardId)) {
+      const index = cardedNormalIds.value.indexOf(cardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
-      cardedNormalIds.value.push(spellId!);
+      cardedNormalIds.value.push(cardId);
     }
   }
 }
