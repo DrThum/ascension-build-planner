@@ -169,6 +169,16 @@ function qualityToCssClass(quality: CardQuality) {
 }
 
 function removeCard(removedCardId: number) {
+  // Remove from the carded slots
+  const indexInNormal = cardedNormalIds.value.indexOf(removedCardId);
+  if (indexInNormal > -1) {
+    cardedNormalIds.value.splice(indexInNormal, 1);
+  }
+  const indexInGolden = cardedGoldenIds.value.indexOf(removedCardId);
+  if (indexInGolden > -1) {
+    cardedGoldenIds.value.splice(indexInGolden, 1);
+  }
+
   const index = cardIds.value.indexOf(removedCardId);
   cardIds.value.splice(index, 1);
 }
@@ -185,7 +195,9 @@ function slotCard(cardId: number, isGolden: boolean) {
     } else {
       // Remove from normal carded slots, if needed
       const indexInNormal = cardedNormalIds.value.indexOf(cardId);
-      cardedNormalIds.value.splice(indexInNormal, 1);
+      if (indexInNormal > -1) {
+        cardedNormalIds.value.splice(indexInNormal, 1);
+      }
       cardedGoldenIds.value.push(cardId);
     }
   } else {
@@ -195,7 +207,9 @@ function slotCard(cardId: number, isGolden: boolean) {
     } else {
       // Remove from golden carded slots, if needed
       const indexInGolden = cardedGoldenIds.value.indexOf(cardId);
-      cardedGoldenIds.value.splice(indexInGolden, 1);
+      if (indexInGolden > -1) {
+        cardedGoldenIds.value.splice(indexInGolden, 1);
+      }
       cardedNormalIds.value.push(cardId);
     }
   }
