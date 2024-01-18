@@ -183,6 +183,9 @@ function slotCard(cardId: number, isGolden: boolean) {
       const index = cardedGoldenIds.value.indexOf(cardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
+      // Remove from normal carded slots, if needed
+      const indexInNormal = cardedNormalIds.value.indexOf(cardId);
+      cardedNormalIds.value.splice(indexInNormal, 1);
       cardedGoldenIds.value.push(cardId);
     }
   } else {
@@ -190,6 +193,9 @@ function slotCard(cardId: number, isGolden: boolean) {
       const index = cardedNormalIds.value.indexOf(cardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
+      // Remove from golden carded slots, if needed
+      const indexInGolden = cardedGoldenIds.value.indexOf(cardId);
+      cardedGoldenIds.value.splice(indexInGolden, 1);
       cardedNormalIds.value.push(cardId);
     }
   }
