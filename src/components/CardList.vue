@@ -151,10 +151,20 @@ function performSearch() {
   });
 }
 
+const qualityRanks = {
+  [CardQuality.Common]: 4,
+  [CardQuality.Uncommon]: 3,
+  [CardQuality.Rare]: 2,
+  [CardQuality.Epic]: 1,
+  [CardQuality.Legendary]: 0,
+};
+
 const cards = computed(() => {
-  return cardIds.value
+  const cards = cardIds.value
     .map((cardId) => dataSource.find((sourceCard) => sourceCard.normalCardId === cardId))
     .filter((card) => card !== undefined) as Card[];
+
+  return _.sortBy(cards, (c) => qualityRanks[c.quality]);
 });
 
 const cardedNormal = computed(() => {
