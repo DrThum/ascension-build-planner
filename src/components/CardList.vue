@@ -6,11 +6,14 @@
 
     <ul class="cards-list">
       <li v-for="card in cardedNormal" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, false).description"
+        <span
+          v-tooltip.left="
+            cardsStore.spellForCard(card.normalCardId, cardCategory, false).description
+          "
           >{{ card.spells[0].name }} (<span
-            :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, false) === 0 }"
+            :class="{ 'not-collected': cardsStore.collectedRank(card.normalCardId, false) === 0 }"
           >
-            {{ cardsStore.collectedRank(card.cardId, false) }}/{{ card.maxRank }} </span
+            {{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }} </span
           >)</span
         >
       </li>
@@ -18,10 +21,16 @@
 
     <ul class="cards-list">
       <li v-for="card in cardedGolden" :class="qualityToCssClass(card.quality)" class="golden">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, true).description">
+        <span
+          v-tooltip.left="
+            cardsStore.spellForCard(card.goldenCardId, cardCategory, true).description
+          "
+        >
           {{ card.spells[0].name }}
-          (<span :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, true) === 0 }">
-            {{ cardsStore.collectedRank(card.cardId, true) }}/{{ card.maxRank }} </span
+          (<span
+            :class="{ 'not-collected': cardsStore.collectedRank(card.goldenCardId, true) === 0 }"
+          >
+            {{ cardsStore.collectedRank(card.goldenCardId, true) }}/{{ card.maxRank }} </span
           >)
         </span>
       </li>
@@ -39,10 +48,13 @@
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">
-            {{ cardsStore.spellForCard(slotProps.option.cardId, cardCategory, false).name }}
+            {{ cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false).name }}
           </p>
           <p class="result-description" style="max-width: 500px; white-space: normal">
-            {{ cardsStore.spellForCard(slotProps.option.cardId, cardCategory, false).description }}
+            {{
+              cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false)
+                .description
+            }}
           </p>
         </div>
       </template>
@@ -51,7 +63,9 @@
     <ul class="cards-list">
       <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
         <span
-          v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, false, card.maxRank)"
+          v-tooltip.left="
+            cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
+          "
           >{{ card.spells[0].name }}</span
         >
         <div>
@@ -60,13 +74,13 @@
             severity="secondary"
             text
             rounded
-            @click="toggleMenu(card.cardId, $event)"
+            @click="toggleMenu(card, $event)"
           />
           <Menu
-            :ref="(el) => (slotCardMenuRefs[card.cardId] = el)"
+            :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
             :model="[
-              { label: 'Slot as normal', command: () => slotCard(card.cardId, false) },
-              { label: 'Slot as golden', command: () => slotCard(card.cardId, true) },
+              { label: 'Slot as normal', command: () => slotCard(card, false) },
+              { label: 'Slot as golden', command: () => slotCard(card, true) },
             ]"
             :popup="true"
           />
@@ -76,7 +90,7 @@
             severity="secondary"
             text
             rounded
-            @click="removeCard(card.cardId)"
+            @click="removeCard(card)"
           />
         </div>
       </li>
@@ -121,20 +135,11 @@ const props = defineProps({
 const search = ref('');
 const searchResults = ref([] as Array<Card>);
 
-const dataSource = {
-  normal:
-    props.cardCategory === CardCategory.Ability
-      ? cardsStore.all.abilityNormal
-      : cardsStore.all.talentNormal,
-  golden:
-    props.cardCategory === CardCategory.Ability
-      ? cardsStore.all.abilityGolden
-      : cardsStore.all.talentGolden,
-};
-
+const dataSource =
+  props.cardCategory === CardCategory.Ability ? cardsStore.all.ability : cardsStore.all.talent;
 function performSearch() {
-  searchResults.value = dataSource.normal.filter((card) => {
-    const cardAlreadyChosen = cardIds.value.includes(card.cardId);
+  searchResults.value = dataSource.filter((card) => {
+    const cardAlreadyChosen = cardIds.value.includes(card.normalCardId);
     const allSpellNamesAndDescr = card.spells
       .map((spell) => `${spell.name} ${spell.description}`)
       .join('\n');
@@ -148,35 +153,24 @@ function performSearch() {
 
 const cards = computed(() => {
   return cardIds.value
-    .map((cardId) => dataSource.normal.find((sourceCard) => sourceCard.cardId === cardId))
+    .map((cardId) => dataSource.find((sourceCard) => sourceCard.normalCardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedNormal = computed(() => {
-  return cardedNormalIds
-    .value!.map((cardId) => dataSource.normal.find((sourceCard) => sourceCard.cardId === cardId))
+  return cardedNormalIds.value
+    .map((cardId) => dataSource.find((sourceCard) => sourceCard.normalCardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedGolden = computed(() => {
-  return cardedGoldenIds
-    .value!.map((cardId) => {
-      console.log(
-        'cardId',
-        cardId,
-        dataSource.golden.find((sourceCard) => {
-          // console.log('sourceCard', sourceCard);
-          return sourceCard.cardId === cardId;
-        }),
-        dataSource.golden[0],
-      );
-      return dataSource.golden.find((sourceCard) => sourceCard.cardId === cardId);
-    })
+  return cardedGoldenIds.value
+    .map((cardId) => dataSource.find((sourceCard) => sourceCard.goldenCardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 function cardSelected(ev: AutoCompleteItemSelectEvent) {
-  cardIds.value.push(ev.value.cardId);
+  cardIds.value.push(ev.value.normalCardId);
   search.value = '';
 }
 
@@ -197,49 +191,49 @@ function qualityToCssClass(quality: CardQuality) {
   }
 }
 
-function removeCard(removedCardId: number) {
+function removeCard(removedCard: Card) {
   // Remove from the carded slots
-  const indexInNormal = cardedNormalIds.value.indexOf(removedCardId);
+  const indexInNormal = cardedNormalIds.value.indexOf(removedCard.normalCardId);
   if (indexInNormal > -1) {
     cardedNormalIds.value.splice(indexInNormal, 1);
   }
-  const indexInGolden = cardedGoldenIds.value.indexOf(removedCardId);
+  const indexInGolden = cardedGoldenIds.value.indexOf(removedCard.goldenCardId);
   if (indexInGolden > -1) {
     cardedGoldenIds.value.splice(indexInGolden, 1);
   }
 
-  const index = cardIds.value.indexOf(removedCardId);
+  const index = cardIds.value.indexOf(removedCard.normalCardId);
   cardIds.value.splice(index, 1);
 }
 
-function toggleMenu(cardId: number, event: Event) {
-  slotCardMenuRefs.value[cardId].toggle(event);
+function toggleMenu(card: Card, event: Event) {
+  slotCardMenuRefs.value[card.normalCardId].toggle(event);
 }
 
-function slotCard(normalCardId: number, isGolden: boolean) {
+function slotCard(card: Card, isGolden: boolean) {
   if (isGolden) {
-    if (cardedGoldenIds.value.includes(normalCardId)) {
-      const index = cardedGoldenIds.value.indexOf(normalCardId);
+    if (cardedGoldenIds.value.includes(card.goldenCardId)) {
+      const index = cardedGoldenIds.value.indexOf(card.goldenCardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
       // Remove from normal carded slots, if needed
-      const indexInNormal = cardedNormalIds.value.indexOf(normalCardId);
+      const indexInNormal = cardedNormalIds.value.indexOf(card.normalCardId);
       if (indexInNormal > -1) {
         cardedNormalIds.value.splice(indexInNormal, 1);
       }
-      cardedGoldenIds.value.push(normalCardId);
+      cardedGoldenIds.value.push(card.goldenCardId);
     }
   } else {
-    if (cardedNormalIds.value.includes(normalCardId)) {
-      const index = cardedNormalIds.value.indexOf(normalCardId);
+    if (cardedNormalIds.value.includes(card.normalCardId)) {
+      const index = cardedNormalIds.value.indexOf(card.normalCardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
       // Remove from golden carded slots, if needed
-      const indexInGolden = cardedGoldenIds.value.indexOf(normalCardId);
+      const indexInGolden = cardedGoldenIds.value.indexOf(card.goldenCardId);
       if (indexInGolden > -1) {
         cardedGoldenIds.value.splice(indexInGolden, 1);
       }
-      cardedNormalIds.value.push(normalCardId);
+      cardedNormalIds.value.push(card.normalCardId);
     }
   }
 }

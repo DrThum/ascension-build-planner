@@ -1,5 +1,6 @@
 export type Card = {
-  cardId: number;
+  normalCardId: number;
+  goldenCardId: number;
   quality: CardQuality;
   maxRank: number;
   spells: Spell[];

@@ -12,10 +12,8 @@ import { abilityGolden, abilityNormal } from '@/assets/ability_cards.json';
 import { talentGolden, talentNormal } from '@/assets/talent_cards.json';
 
 type CardCatalog = {
-  abilityNormal: Card[];
-  abilityGolden: Card[];
-  talentNormal: Card[];
-  talentGolden: Card[];
+  ability: Card[];
+  talent: Card[];
 };
 
 export const useCardsStore = defineStore('cards', {
@@ -29,10 +27,8 @@ export const useCardsStore = defineStore('cards', {
     } as CardCollection,
     // All available cards
     all: {
-      abilityNormal: buildCardsData(abilityNormal),
-      abilityGolden: buildCardsData(abilityGolden),
-      talentNormal: buildCardsData(talentNormal),
-      talentGolden: buildCardsData(talentGolden),
+      ability: buildCardsData(abilityNormal, abilityGolden),
+      talent: buildCardsData(talentNormal, talentGolden),
     } as CardCatalog,
   }),
   actions: {
@@ -49,25 +45,27 @@ export const useCardsStore = defineStore('cards', {
         if (category === CardCategory.Ability) {
           if (isGolden) {
             relevantCollectedCards = state.collection.abilityGolden;
-            relevantCardCatalog = state.all.abilityGolden;
           } else {
             relevantCollectedCards = state.collection.abilityNormal;
-            relevantCardCatalog = state.all.abilityNormal;
           }
+
+          relevantCardCatalog = state.all.ability;
         } else {
           if (isGolden) {
             relevantCollectedCards = state.collection.talentGolden;
-            relevantCardCatalog = state.all.talentGolden;
           } else {
             relevantCollectedCards = state.collection.talentNormal;
-            relevantCardCatalog = state.all.talentNormal;
           }
+
+          relevantCardCatalog = state.all.talent;
         }
 
         const rankToFind =
           overrideRank ?? relevantCollectedCards.find((c) => c.cardId === cardId)?.rank ?? 1;
 
-        const card = relevantCardCatalog.find((a) => a.cardId === cardId);
+        const card = relevantCardCatalog.find((a) =>
+          isGolden ? a.goldenCardId === cardId : a.normalCardId === cardId,
+        );
         const spell = card && card.spells.find((s) => s.rank === rankToFind);
 
         if (spell) {
@@ -103,29 +101,36 @@ type RawCardData = {
   description: string;
 };
 
-function buildCardsData(raw: RawCardData[]): Card[] {
-  const allCards: Card[] = raw.reduce((acc, card) => {
-    const thisCard = acc.find((c) => c.cardId === card.cardId);
+function buildCardsData(rawNormal: RawCardData[], rawGolden: RawCardData[]): Card[] {
+  const allCards: Card[] = rawNormal.reduce((acc, normalCard) => {
+    const thisCard = acc.find((c) => c.normalCardId === normalCard.cardId);
     if (thisCard) {
       // Add this spell rank to the card and sort the spells by rank
       thisCard.spells.push({
-        id: card.spellId,
-        name: card.spellName,
-        description: card.description,
-        rank: card.rank,
+        id: normalCard.spellId,
+        name: normalCard.spellName,
+        description: normalCard.description,
+        rank: normalCard.rank,
       });
     } else {
+      const goldenCard = rawGolden.find((r) => r.spellId === normalCard.spellId);
+
+      if (!goldenCard) {
+        console.error(`normal card id ${normalCard.cardId} has no golden equivalent`);
+      }
+
       // Add this card to the accumulator
       acc.push({
-        cardId: card.cardId,
-        quality: card.quality as CardQuality,
-        maxRank: card.maxRank,
+        normalCardId: normalCard.cardId,
+        goldenCardId: goldenCard?.cardId ?? 0,
+        quality: normalCard.quality as CardQuality,
+        maxRank: normalCard.maxRank,
         spells: [
           {
-            id: card.spellId,
-            name: card.spellName,
-            description: card.description,
-            rank: card.rank,
+            id: normalCard.spellId,
+            name: normalCard.spellName,
+            description: normalCard.description,
+            rank: normalCard.rank,
           },
         ],
       });
@@ -134,5 +139,5 @@ function buildCardsData(raw: RawCardData[]): Card[] {
     return acc;
   }, [] as Card[]);
 
-  return _.sortBy(allCards, (card) => card.cardId);
+  return _.sortBy(allCards, (card) => card.normalCardId);
 }
