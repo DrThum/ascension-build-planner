@@ -12,5 +12,5 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  base: '/ascension-build-planner',
+  base: process.env.NODE_ENV === 'production' ? '/ascension-build-planner/' : '/',
 });
