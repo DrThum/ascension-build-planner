@@ -15,3 +15,5 @@ jobs:
           username: 'DrThum'
           reponame: 'ascension-build-planner'
           token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+      - name: rename dist to docs
+        run: mv dist/ docs/
