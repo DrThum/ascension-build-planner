@@ -66,9 +66,18 @@
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
           "
-          >{{ card.spells[0].name }}<br /><span class="required-level"
-            >(requires level {{ card.requiredLevel }})</span
-          ></span
+          >{{ card.spells[0].name }}
+          <span
+            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0"
+            class="card-collected-check"
+            ><i class="pi pi-check-circle"
+          /></span>
+          <span
+            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0"
+            class="card-collected-check golden"
+            ><i class="pi pi-check-circle"
+          /></span>
+          <br /><span class="required-level">(requires level {{ card.requiredLevel }})</span></span
         >
         <div>
           <Button
@@ -81,8 +90,22 @@
           <Menu
             :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
             :model="[
-              { label: 'Slot as normal', command: () => slotCard(card, false) },
-              { label: 'Slot as golden', command: () => slotCard(card, true) },
+              {
+                label: 'Slot as normal',
+                icon:
+                  cardsStore.collectedRank(card.normalCardId, false) > 0
+                    ? PrimeIcons.CHECK_CIRCLE
+                    : PrimeIcons.EXCLAMATION_CIRCLE,
+                command: () => slotCard(card, false),
+              },
+              {
+                label: 'Slot as golden',
+                icon:
+                  cardsStore.collectedRank(card.goldenCardId, true) > 0
+                    ? PrimeIcons.CHECK_CIRCLE
+                    : PrimeIcons.EXCLAMATION_CIRCLE,
+                command: () => slotCard(card, true),
+              },
             ]"
             :popup="true"
           />
@@ -108,6 +131,8 @@ import Button from 'primevue/button';
 import Menu from 'primevue/menu';
 import { useCardsStore } from '@/stores/cards';
 import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
+
+import { PrimeIcons } from 'primevue/api';
 
 import { CardCategory } from '@/types/cards.types';
 
@@ -315,5 +340,15 @@ ul.cards-list .not-collected {
 
 .required-level {
   opacity: 60%;
+}
+
+.card-collected-check {
+  padding-right: 5px;
+  opacity: 60%;
+}
+
+.card-collected-check.golden {
+  color: rgba(255, 234, 43, 1);
+  opacity: 100%;
 }
 </style>
