@@ -8,12 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Vue
     steps:
-      - uses: actions/checkout@v2
-      - id: Build-Vue
-        uses: xRealNeon/VuePagesAction@1.0.1
-        with:
-          username: 'DrThum'
-          reponame: 'ascension-build-planner'
-          token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
-      - name: rename dist to docs
-        run: mv dist/ docs/
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          npm ci
+          npm run build
+          mv dist/ docs/
+          git config --global user.email "${{ inputs.gitemail }}"
+          git config --global user.name "${{ inputs.gitname }}"
+          git init
+          git add -A
+          git commit -m '${{ inputs.gitmsg }}'
+          git push -f https://${{ inputs.username }}:${{ inputs.token }}@github.com/${{ inputs.username }}/${{ inputs.reponame }}.git master:gh-pages
