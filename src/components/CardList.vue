@@ -66,7 +66,9 @@
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
           "
-          >{{ card.spells[0].name }}<br />(requires level {{ card.requiredLevel }})</span
+          >{{ card.spells[0].name }}<br /><span class="required-level"
+            >(requires level {{ card.requiredLevel }})</span
+          ></span
         >
         <div>
           <Button
@@ -309,5 +311,9 @@ ul.cards-list li.golden {
 
 ul.cards-list .not-collected {
   color: red;
+}
+
+.required-level {
+  opacity: 60%;
 }
 </style>
