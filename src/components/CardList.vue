@@ -6,7 +6,7 @@
 
     <ul class="cards-list">
       <li v-for="card in cardedNormal" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false).description"
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, false).description"
           >{{ card.spells[0].name }} (<span
             :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, false) === 0 }"
           >
@@ -18,7 +18,7 @@
 
     <ul class="cards-list">
       <li v-for="card in cardedGolden" :class="qualityToCssClass(card.quality)" class="golden">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, true).description">
+        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, true).description">
           {{ card.spells[0].name }}
           (<span :class="{ 'not-collected': cardsStore.collectedRank(card.cardId, true) === 0 }">
             {{ cardsStore.collectedRank(card.cardId, true) }}/{{ card.maxRank }} </span
@@ -39,10 +39,10 @@
       <template #option="slotProps">
         <div class="flex align-options-center">
           <p class="result-title">
-            {{ cardsStore.spellForCard(slotProps.option.cardId, false).name }}
+            {{ cardsStore.spellForCard(slotProps.option.cardId, cardCategory, false).name }}
           </p>
           <p class="result-description" style="max-width: 500px; white-space: normal">
-            {{ cardsStore.spellForCard(slotProps.option.cardId, false).description }}
+            {{ cardsStore.spellForCard(slotProps.option.cardId, cardCategory, false).description }}
           </p>
         </div>
       </template>
@@ -50,9 +50,10 @@
 
     <ul class="cards-list">
       <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
-        <span v-tooltip.left="cardsStore.spellForCard(card.cardId, false, card.maxRank)">{{
-          card.spells[0].name
-        }}</span>
+        <span
+          v-tooltip.left="cardsStore.spellForCard(card.cardId, cardCategory, false, card.maxRank)"
+          >{{ card.spells[0].name }}</span
+        >
         <div>
           <Button
             icon="pi pi-credit-card"
@@ -120,11 +121,19 @@ const props = defineProps({
 const search = ref('');
 const searchResults = ref([] as Array<Card>);
 
-const dataSource =
-  props.cardCategory === CardCategory.Ability ? cardsStore.abilities : cardsStore.talents;
+const dataSource = {
+  normal:
+    props.cardCategory === CardCategory.Ability
+      ? cardsStore.all.abilityNormal
+      : cardsStore.all.talentNormal,
+  golden:
+    props.cardCategory === CardCategory.Ability
+      ? cardsStore.all.abilityGolden
+      : cardsStore.all.talentGolden,
+};
 
 function performSearch() {
-  searchResults.value = dataSource.filter((card) => {
+  searchResults.value = dataSource.normal.filter((card) => {
     const cardAlreadyChosen = cardIds.value.includes(card.cardId);
     const allSpellNamesAndDescr = card.spells
       .map((spell) => `${spell.name} ${spell.description}`)
@@ -139,19 +148,30 @@ function performSearch() {
 
 const cards = computed(() => {
   return cardIds.value
-    .map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
+    .map((cardId) => dataSource.normal.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedNormal = computed(() => {
   return cardedNormalIds
-    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
+    .value!.map((cardId) => dataSource.normal.find((sourceCard) => sourceCard.cardId === cardId))
     .filter((card) => card !== undefined) as Card[];
 });
 
 const cardedGolden = computed(() => {
   return cardedGoldenIds
-    .value!.map((cardId) => dataSource.find((sourceCard) => sourceCard.cardId === cardId))
+    .value!.map((cardId) => {
+      console.log(
+        'cardId',
+        cardId,
+        dataSource.golden.find((sourceCard) => {
+          // console.log('sourceCard', sourceCard);
+          return sourceCard.cardId === cardId;
+        }),
+        dataSource.golden[0],
+      );
+      return dataSource.golden.find((sourceCard) => sourceCard.cardId === cardId);
+    })
     .filter((card) => card !== undefined) as Card[];
 });
 
@@ -196,30 +216,30 @@ function toggleMenu(cardId: number, event: Event) {
   slotCardMenuRefs.value[cardId].toggle(event);
 }
 
-function slotCard(cardId: number, isGolden: boolean) {
+function slotCard(normalCardId: number, isGolden: boolean) {
   if (isGolden) {
-    if (cardedGoldenIds.value.includes(cardId)) {
-      const index = cardedGoldenIds.value.indexOf(cardId);
+    if (cardedGoldenIds.value.includes(normalCardId)) {
+      const index = cardedGoldenIds.value.indexOf(normalCardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
       // Remove from normal carded slots, if needed
-      const indexInNormal = cardedNormalIds.value.indexOf(cardId);
+      const indexInNormal = cardedNormalIds.value.indexOf(normalCardId);
       if (indexInNormal > -1) {
         cardedNormalIds.value.splice(indexInNormal, 1);
       }
-      cardedGoldenIds.value.push(cardId);
+      cardedGoldenIds.value.push(normalCardId);
     }
   } else {
-    if (cardedNormalIds.value.includes(cardId)) {
-      const index = cardedNormalIds.value.indexOf(cardId);
+    if (cardedNormalIds.value.includes(normalCardId)) {
+      const index = cardedNormalIds.value.indexOf(normalCardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
       // Remove from golden carded slots, if needed
-      const indexInGolden = cardedGoldenIds.value.indexOf(cardId);
+      const indexInGolden = cardedGoldenIds.value.indexOf(normalCardId);
       if (indexInGolden > -1) {
         cardedGoldenIds.value.splice(indexInGolden, 1);
       }
-      cardedNormalIds.value.push(cardId);
+      cardedNormalIds.value.push(normalCardId);
     }
   }
 }

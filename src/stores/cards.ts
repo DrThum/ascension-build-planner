@@ -1,19 +1,39 @@
 import { defineStore } from 'pinia';
 
-import type { Card, CardCollection, CardQuality } from '@/types/cards.types';
+import {
+  CardCategory,
+  type Card,
+  type CardCollection,
+  type CardQuality,
+} from '@/types/cards.types';
 import _ from 'lodash';
-import skillCards from '../assets/skill_cards.json';
+
+import { abilityGolden, abilityNormal } from '@/assets/ability_cards.json';
+import { talentGolden, talentNormal } from '@/assets/talent_cards.json';
+
+type CardCatalog = {
+  abilityNormal: Card[];
+  abilityGolden: Card[];
+  talentNormal: Card[];
+  talentGolden: Card[];
+};
 
 export const useCardsStore = defineStore('cards', {
   state: () => ({
+    // Player collected cards
     collection: {
       abilityNormal: [],
       abilityGolden: [],
       talentNormal: [],
       talentGolden: [],
     } as CardCollection,
-    abilities: buildCardsData(skillCards.abilities),
-    talents: buildCardsData(skillCards.talents),
+    // All available cards
+    all: {
+      abilityNormal: buildCardsData(abilityNormal),
+      abilityGolden: buildCardsData(abilityGolden),
+      talentNormal: buildCardsData(talentNormal),
+      talentGolden: buildCardsData(talentGolden),
+    } as CardCatalog,
   }),
   actions: {
     setCollection(collection: CardCollection) {
@@ -23,24 +43,35 @@ export const useCardsStore = defineStore('cards', {
   getters: {
     spellForCard: (state) => {
       // If overrideRank is undefined, use player's collected rank
-      return (cardId: number, isGolden: boolean, overrideRank?: number) => {
-        const relevantCollectedCards = isGolden
-          ? state.collection.abilityGolden.concat(state.collection.talentGolden)
-          : state.collection.abilityNormal.concat(state.collection.talentNormal);
+      return (cardId: number, category: CardCategory, isGolden: boolean, overrideRank?: number) => {
+        let relevantCollectedCards = [];
+        let relevantCardCatalog = [];
+        if (category === CardCategory.Ability) {
+          if (isGolden) {
+            relevantCollectedCards = state.collection.abilityGolden;
+            relevantCardCatalog = state.all.abilityGolden;
+          } else {
+            relevantCollectedCards = state.collection.abilityNormal;
+            relevantCardCatalog = state.all.abilityNormal;
+          }
+        } else {
+          if (isGolden) {
+            relevantCollectedCards = state.collection.talentGolden;
+            relevantCardCatalog = state.all.talentGolden;
+          } else {
+            relevantCollectedCards = state.collection.talentNormal;
+            relevantCardCatalog = state.all.talentNormal;
+          }
+        }
 
         const rankToFind =
           overrideRank ?? relevantCollectedCards.find((c) => c.cardId === cardId)?.rank ?? 1;
 
-        const abilityCard = state.abilities.find((a) => a.cardId === cardId);
-        const abilitySpell = abilityCard && abilityCard.spells.find((s) => s.rank === rankToFind);
+        const card = relevantCardCatalog.find((a) => a.cardId === cardId);
+        const spell = card && card.spells.find((s) => s.rank === rankToFind);
 
-        const talentCard = state.talents.find((t) => t.cardId === cardId);
-        const talentSpell = talentCard && talentCard.spells.find((s) => s.rank === rankToFind);
-
-        if (abilitySpell) {
-          return abilitySpell;
-        } else if (talentSpell) {
-          return talentSpell;
+        if (spell) {
+          return spell;
         } else {
           throw new Error(
             `spellForCard: user's collection contains an unknown card with id ${cardId} and rank ${rankToFind}`,
