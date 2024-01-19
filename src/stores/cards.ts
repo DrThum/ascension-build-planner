@@ -99,6 +99,7 @@ type RawCardData = {
   rank: number;
   maxRank: number;
   description: string;
+  requiredLevel?: number;
 };
 
 function buildCardsData(rawNormal: RawCardData[], rawGolden: RawCardData[]): Card[] {
@@ -125,6 +126,7 @@ function buildCardsData(rawNormal: RawCardData[], rawGolden: RawCardData[]): Car
         goldenCardId: goldenCard?.cardId ?? 0,
         quality: normalCard.quality as CardQuality,
         maxRank: normalCard.maxRank,
+        requiredLevel: normalCard.requiredLevel ?? 1,
         spells: [
           {
             id: normalCard.spellId,

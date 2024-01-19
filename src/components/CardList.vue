@@ -66,7 +66,7 @@
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
           "
-          >{{ card.spells[0].name }}</span
+          >{{ card.spells[0].name }}<br />(requires level {{ card.requiredLevel }})</span
         >
         <div>
           <Button

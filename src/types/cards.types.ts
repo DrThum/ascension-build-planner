@@ -3,6 +3,7 @@ export type Card = {
   goldenCardId: number;
   quality: CardQuality;
   maxRank: number;
+  requiredLevel: number;
   spells: Spell[];
 };
 
