@@ -224,7 +224,7 @@ const cards = computed(() => {
         card.spells[0].name.toLowerCase().includes(currentFilter.value.toLowerCase()),
     ) as Card[];
 
-  return _.sortBy(cards, (c) => qualityRanks[c.quality]);
+  return _.sortBy(cards, (c) => [qualityRanks[c.quality], c.spells[0].name]);
 });
 
 const cardedNormal = computed(() => {

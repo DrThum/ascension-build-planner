@@ -218,7 +218,6 @@ onBeforeMount(async () => {
       const blob = await resp.blob();
 
       const btext = await blob.text();
-      console.log(btext);
 
       const sharedBuild = JSON.parse(await blob.text());
       Object.assign(currentBuild, sharedBuild, { id: undefined });
@@ -303,7 +302,7 @@ async function importCollection() {
       life: 3000,
     });
   } catch (e) {
-    console.log(`collection import error: {e}`);
+    console.error(`collection import error: {e}`);
     toast.add({
       severity: 'error',
       summary: 'Error',
