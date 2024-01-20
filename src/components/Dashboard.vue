@@ -378,5 +378,6 @@ main.no-build {
 .lists .card-list-container:first-child {
   border-right: solid 3px;
   padding-right: 4px;
+  margin-right: 8px;
 }
 </style>

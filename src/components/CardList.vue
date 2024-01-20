@@ -326,7 +326,6 @@ function hasCardSlotted(cardId: number): boolean {
 <style>
 .card-list-container {
   flex-grow: 1;
-  margin-right: 10px;
 }
 
 .p-autocomplete .p-autocomplete-input {
