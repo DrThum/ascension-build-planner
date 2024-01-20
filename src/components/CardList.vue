@@ -17,6 +17,9 @@
           >)</span
         >
       </li>
+      <li v-for="_i in new Array(3 - cardedNormal.length)">
+        <span class="empty-card-slot">&lt;empty slot&gt;</span>
+      </li>
     </ul>
 
     <ul class="cards-list">
@@ -33,6 +36,9 @@
             {{ cardsStore.collectedRank(card.goldenCardId, true) }}/{{ card.maxRank }} </span
           >)
         </span>
+      </li>
+      <li v-for="_i in new Array(3 - cardedGolden.length)" class="golden">
+        <span class="empty-card-slot">&lt;empty slot&gt;</span>
       </li>
     </ul>
 
@@ -368,5 +374,10 @@ ul.cards-list .not-collected {
 .p-button-xsm {
   padding: 0;
   width: 30px;
+}
+
+.empty-card-slot {
+  font-style: italic;
+  opacity: 60%;
 }
 </style>
