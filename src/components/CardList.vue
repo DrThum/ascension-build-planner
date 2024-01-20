@@ -65,19 +65,21 @@
         <span
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
+              .description
           "
           >{{ card.spells[0].name }}
+          <br />
           <span
             v-if="cardsStore.collectedRank(card.normalCardId, false) > 0"
-            class="card-collected-check"
-            ><i class="pi pi-check-circle"
-          /></span>
+            class="card-collected-indicator spell-metadata"
+            >N</span
+          >
           <span
             v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0"
-            class="card-collected-check golden"
-            ><i class="pi pi-check-circle"
-          /></span>
-          <br /><span class="required-level">(requires level {{ card.requiredLevel }})</span></span
+            class="card-collected-indicator golden spell-metadata"
+            >G</span
+          >
+          <span class="required-level spell-metadata">(lvl {{ card.requiredLevel }})</span></span
         >
         <div>
           <Button
@@ -338,17 +340,22 @@ ul.cards-list .not-collected {
   color: red;
 }
 
+.spell-metadata {
+  line-height: 1.7em;
+}
+
 .required-level {
   opacity: 60%;
 }
 
-.card-collected-check {
-  padding-right: 5px;
-  opacity: 60%;
+.card-collected-indicator {
+  margin-right: 5px;
+  border: solid 2px;
+  padding: 0 3px;
+  border-radius: 3px;
 }
 
-.card-collected-check.golden {
+.card-collected-indicator.golden {
   color: rgba(255, 234, 43, 1);
-  opacity: 100%;
 }
 </style>
