@@ -19,6 +19,13 @@
         severity="danger"
         @click="deleteBuild($event)"
       />
+      <Button
+        icon="pi pi-share-alt"
+        iconPos="right"
+        label="Share"
+        severity="success"
+        @click="shareBuild"
+      />
     </div>
     <div>
       <Button
@@ -183,7 +190,43 @@ async function create() {
 onBeforeMount(async () => {
   const collection = await getCollection();
   cardsStore.setCollection(collection);
+
+  // Load shared build, if any
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedBuildBase64 = urlParams.get('build');
+  if (sharedBuildBase64) {
+    try {
+      const sharedBuild = JSON.parse(atob(sharedBuildBase64));
+      Object.assign(currentBuild, sharedBuild, { id: undefined });
+
+      urlParams.delete('build');
+      window.history.replaceState({}, '', window.location.href.split('?')[0]);
+    } catch (e) {
+      console.error('error loading shared build:', e);
+
+      toast.add({
+        severity: 'error',
+        summary: 'Error importing build',
+        detail: 'The imported build format is incorrect',
+        life: 3000,
+      });
+    }
+  }
 });
+
+function shareBuild() {
+  const base = window.location.href.split('?')[0];
+  const buildAsBase64 = btoa(JSON.stringify({ ...currentBuild, id: undefined }));
+
+  navigator.clipboard.writeText(`${base}?build=${buildAsBase64}`);
+
+  toast.add({
+    severity: 'success',
+    summary: 'Build sharing URL copied',
+    detail: 'The sharing URL is now in your clipboard',
+    life: 3000,
+  });
+}
 
 const savedBuilds: Ref<Build[]> = useObservable(from(liveQuery(async () => list())));
 
