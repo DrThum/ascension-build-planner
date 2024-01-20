@@ -81,7 +81,7 @@
 </template>
 
 <script setup async lang="ts">
-import { ref, type Ref, reactive, toRaw, onBeforeMount } from 'vue';
+import { ref, type Ref, reactive, toRaw, onBeforeMount, watch } from 'vue';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -182,6 +182,12 @@ onBeforeMount(async () => {
 });
 
 const savedBuilds: Ref<Build[]> = useObservable(from(liveQuery(async () => list())));
+
+watch(savedBuilds, (newSavedBuilds) => {
+  if (!selectedBuildId.value && newSavedBuilds.length > 0) {
+    selectedBuildId.value = newSavedBuilds[newSavedBuilds.length - 1].id!;
+  }
+});
 
 async function importCollection() {
   if (!collectionImportString.value || collectionImportString.value.length === 0) {
