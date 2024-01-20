@@ -67,7 +67,7 @@
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
               .description
           "
-          >{{ card.spells[0].name }}
+          ><span class="card-spell-name">{{ card.spells[0].name }}</span>
           <br />
           <span
             v-if="cardsStore.collectedRank(card.normalCardId, false) > 0"
@@ -86,7 +86,7 @@
             icon="pi pi-credit-card"
             severity="secondary"
             text
-            rounded
+            class="p-button-xsm"
             @click="toggleMenu(card, $event)"
           />
           <Menu
@@ -116,7 +116,7 @@
             role="remove-spell"
             severity="secondary"
             text
-            rounded
+            class="p-button-xsm"
             @click="removeCard(card)"
           />
         </div>
@@ -357,5 +357,16 @@ ul.cards-list .not-collected {
 
 .card-collected-indicator.golden {
   color: rgba(255, 234, 43, 1);
+}
+
+.card-spell-name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.p-button-xsm {
+  padding: 0;
+  width: 30px;
 }
 </style>
