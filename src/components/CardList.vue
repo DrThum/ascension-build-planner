@@ -99,29 +99,29 @@
             :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
             :model="[
               {
-                label: cardedNormalIds.includes(card.normalCardId) ? 'Unslot' : 'Slot as normal',
+                label: hasCardSlotted(card.normalCardId) ? 'Unslot' : 'Slot as normal',
                 class:
-                  cardedNormal.length >= 3 && !cardedNormalIds.includes(card.normalCardId)
+                  cardedNormal.length >= 3 && !hasCardSlotted(card.normalCardId)
                     ? 'slot-disabled'
                     : '',
                 icon:
                   (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
                     cardedNormal.length < 3) ||
-                  cardedNormalIds.includes(card.normalCardId)
+                  hasCardSlotted(card.normalCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
                 command: () => slotCard(card, false),
               },
               {
-                label: cardedGoldenIds.includes(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
+                label: hasCardSlotted(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
                 class:
-                  cardedGolden.length >= 3 && !cardedGoldenIds.includes(card.goldenCardId)
+                  cardedGolden.length >= 3 && !hasCardSlotted(card.goldenCardId)
                     ? 'slot-disabled'
                     : '',
                 icon:
                   (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
                     cardedGolden.length < 3) ||
-                  cardedGoldenIds.includes(card.goldenCardId)
+                  hasCardSlotted(card.goldenCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
                 command: () => slotCard(card, true),
@@ -316,6 +316,10 @@ function slotCard(card: Card, isGolden: boolean) {
       cardedNormalIds.value.push(card.normalCardId);
     }
   }
+}
+
+function hasCardSlotted(cardId: number): boolean {
+  return cardedNormalIds.value.includes(cardId) || cardedGolden.value.includes(cardId);
 }
 </script>
 
