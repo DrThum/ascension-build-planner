@@ -319,7 +319,7 @@ function slotCard(card: Card, isGolden: boolean) {
 }
 
 function hasCardSlotted(cardId: number): boolean {
-  return cardedNormalIds.value.includes(cardId) || cardedGolden.value.includes(cardId);
+  return cardedNormalIds.value.includes(cardId) || cardedGoldenIds.value.includes(cardId);
 }
 </script>
 
