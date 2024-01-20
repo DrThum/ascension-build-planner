@@ -1,5 +1,6 @@
 <template>
   <Toast />
+  <ConfirmPopup></ConfirmPopup>
   <header v-if="currentBuild && currentBuild.name">
     <div>
       <InputText type="text" v-model="currentBuild.name" />
@@ -16,7 +17,7 @@
         iconPos="right"
         label="Delete"
         severity="danger"
-        @click="deleteBuild"
+        @click="deleteBuild($event)"
       />
     </div>
     <div>
@@ -89,6 +90,8 @@ import InputText from 'primevue/inputtext';
 import TextArea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmPopup from 'primevue/confirmpopup';
 
 import CardGroupList from './CardGroupList.vue';
 import CardList from './CardList.vue';
@@ -110,6 +113,7 @@ const collectionImportString = ref('');
 const cardsStore = useCardsStore();
 
 const toast = useToast();
+const confirm = useConfirm();
 
 function loadBuild() {
   Object.assign(
@@ -136,12 +140,22 @@ function closeBuild() {
   }
 }
 
-async function deleteBuild() {
-  if (currentBuild.id) {
-    await deleteById(currentBuild.id);
-  }
+async function deleteBuild(event) {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Are you sure you want to delete this build?',
+    icon: 'pi pi-exclamation-triangle',
+    acceptClass: 'p-button-danger p-button-sm',
+    accept: async () => {
+      if (currentBuild.id) {
+        await deleteById(currentBuild.id);
+      }
 
-  closeBuild();
+      closeBuild();
+      toast.add({ severity: 'info', summary: 'Build deleted', life: 3000 });
+    },
+    reject: () => {},
+  });
 }
 
 async function create() {
