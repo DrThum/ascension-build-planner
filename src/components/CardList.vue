@@ -99,17 +99,29 @@
             :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
             :model="[
               {
-                label: 'Slot as normal',
+                label: cardedNormalIds.includes(card.normalCardId) ? 'Unslot' : 'Slot as normal',
+                class:
+                  cardedNormal.length >= 3 && !cardedNormalIds.includes(card.normalCardId)
+                    ? 'slot-disabled'
+                    : '',
                 icon:
-                  cardsStore.collectedRank(card.normalCardId, false) > 0
+                  (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
+                    cardedNormal.length < 3) ||
+                  cardedNormalIds.includes(card.normalCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
                 command: () => slotCard(card, false),
               },
               {
-                label: 'Slot as golden',
+                label: cardedGoldenIds.includes(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
+                class:
+                  cardedGolden.length >= 3 && !cardedGoldenIds.includes(card.goldenCardId)
+                    ? 'slot-disabled'
+                    : '',
                 icon:
-                  cardsStore.collectedRank(card.goldenCardId, true) > 0
+                  (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
+                    cardedGolden.length < 3) ||
+                  cardedGoldenIds.includes(card.goldenCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
                 command: () => slotCard(card, true),
@@ -141,6 +153,7 @@ import { useCardsStore } from '@/stores/cards';
 import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
 
 import { PrimeIcons } from 'primevue/api';
+import { useToast } from 'primevue/usetoast';
 
 import { CardCategory } from '@/types/cards.types';
 
@@ -151,6 +164,8 @@ const cardedNormalIds: Ref<number[]> = defineModel('cardSlotsNormal', { required
 const cardedGoldenIds: Ref<number[]> = defineModel('cardSlotsGolden', { required: true });
 
 const slotCardMenuRefs = ref({} as { [x: number]: any });
+
+const toast = useToast();
 
 const props = defineProps({
   title: {
@@ -261,6 +276,16 @@ function slotCard(card: Card, isGolden: boolean) {
       const index = cardedGoldenIds.value.indexOf(card.goldenCardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
+      if (cardedGoldenIds.value.length >= 3) {
+        toast.add({
+          severity: 'error',
+          summary: 'Too many slotted cards',
+          detail: 'You already have 3 slotted golden cards',
+          life: 3000,
+        });
+        return;
+      }
+
       // Remove from normal carded slots, if needed
       const indexInNormal = cardedNormalIds.value.indexOf(card.normalCardId);
       if (indexInNormal > -1) {
@@ -273,6 +298,16 @@ function slotCard(card: Card, isGolden: boolean) {
       const index = cardedNormalIds.value.indexOf(card.normalCardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
+      if (cardedNormalIds.value.length >= 3) {
+        toast.add({
+          severity: 'error',
+          summary: 'Too many slotted cards',
+          detail: 'You already have 3 slotted normal cards',
+          life: 3000,
+        });
+        return;
+      }
+
       // Remove from golden carded slots, if needed
       const indexInGolden = cardedGoldenIds.value.indexOf(card.goldenCardId);
       if (indexInGolden > -1) {
@@ -379,5 +414,10 @@ ul.cards-list .not-collected {
 .empty-card-slot {
   font-style: italic;
   opacity: 60%;
+}
+
+.slot-disabled,
+.slot-disabled span {
+  color: red;
 }
 </style>
