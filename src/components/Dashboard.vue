@@ -187,6 +187,16 @@ async function create() {
   selectedBuildId.value = buildId;
 }
 
+function b64decode(str: string): ArrayBuffer {
+  const binary_string = window.atob(str.replace(/ /g, '+'));
+  const len = binary_string.length;
+  const bytes = new Uint8Array(new ArrayBuffer(len));
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes;
+}
+
 onBeforeMount(async () => {
   const collection = await getCollection();
   cardsStore.setCollection(collection);
@@ -196,7 +206,21 @@ onBeforeMount(async () => {
   const sharedBuildBase64 = urlParams.get('build');
   if (sharedBuildBase64) {
     try {
-      const sharedBuild = JSON.parse(atob(sharedBuildBase64));
+      // https://dev.to/samternent/json-compression-in-the-browser-with-gzip-and-the-compression-streams-api-4135
+      // base64 encoding to Blob
+      const stream = new Blob([b64decode(sharedBuildBase64)], {
+        type: 'application/json',
+      }).stream();
+
+      const compressedReadableStream = stream.pipeThrough(new DecompressionStream('gzip'));
+
+      const resp = new Response(compressedReadableStream);
+      const blob = await resp.blob();
+
+      const btext = await blob.text();
+      console.log(btext);
+
+      const sharedBuild = JSON.parse(await blob.text());
       Object.assign(currentBuild, sharedBuild, { id: undefined });
 
       urlParams.delete('build');
@@ -214,9 +238,28 @@ onBeforeMount(async () => {
   }
 });
 
-function shareBuild() {
+async function shareBuild() {
   const base = window.location.href.split('?')[0];
-  const buildAsBase64 = btoa(JSON.stringify({ ...currentBuild, id: undefined }));
+
+  // https://dev.to/samternent/json-compression-in-the-browser-with-gzip-and-the-compression-streams-api-4135
+  // Convert JSON to Stream
+  const stream = new Blob([JSON.stringify({ ...currentBuild, id: undefined })], {
+    type: 'application/json',
+  }).stream();
+
+  // gzip stream
+  const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
+
+  // create Response
+  const compressedResponse = new Response(compressedReadableStream);
+
+  // Get response Blob
+  const blob = await compressedResponse.blob();
+  // Get the ArrayBuffer
+  const buffer = await blob.arrayBuffer();
+
+  // convert ArrayBuffer to base64 encoded string
+  const buildAsBase64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
   navigator.clipboard.writeText(`${base}?build=${buildAsBase64}`);
 
