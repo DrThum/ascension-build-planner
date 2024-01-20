@@ -43,28 +43,32 @@
     </ul>
 
     <h3>All {{ title.toLowerCase() }} ({{ cardIds.length }}/{{ threshold }})</h3>
-    <AutoComplete
-      v-model="search"
-      :suggestions="searchResults"
-      @complete="performSearch"
-      @item-select="cardSelected"
-      scrollHeight="500px"
-      :placeholder="`Add ${props.title}...`"
-    >
-      <template #option="slotProps">
-        <div class="flex align-options-center">
-          <p class="result-title">
-            {{ cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false).name }}
-          </p>
-          <p class="result-description" style="max-width: 500px; white-space: normal">
-            {{
-              cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false)
-                .description
-            }}
-          </p>
-        </div>
-      </template>
-    </AutoComplete>
+    <div class="search-sort-cards-container">
+      <AutoComplete
+        v-model="search"
+        :suggestions="searchResults"
+        @complete="performSearch"
+        @item-select="cardSelected"
+        scrollHeight="500px"
+        :placeholder="`Add ${props.title}...`"
+      >
+        <template #option="slotProps">
+          <div class="flex align-options-center">
+            <p class="result-title">
+              {{ cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false).name }}
+            </p>
+            <p class="result-description" style="max-width: 500px; white-space: normal">
+              {{
+                cardsStore.spellForCard(slotProps.option.normalCardId, cardCategory, false)
+                  .description
+              }}
+            </p>
+          </div>
+        </template>
+      </AutoComplete>
+
+      <InputText type="text" v-model="currentFilter" placeholder="Filter cards..." />
+    </div>
 
     <ul class="cards-list">
       <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
@@ -147,6 +151,7 @@
 import _ from 'lodash';
 import { CardQuality, type Card } from '../types/cards.types';
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete';
+import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Menu from 'primevue/menu';
 import { useCardsStore } from '@/stores/cards';
@@ -184,6 +189,7 @@ const props = defineProps({
 
 const search = ref('');
 const searchResults = ref([] as Array<Card>);
+const currentFilter = ref('');
 
 const dataSource =
   props.cardCategory === CardCategory.Ability ? cardsStore.all.ability : cardsStore.all.talent;
@@ -212,7 +218,11 @@ const qualityRanks = {
 const cards = computed(() => {
   const cards = cardIds.value
     .map((cardId) => dataSource.find((sourceCard) => sourceCard.normalCardId === cardId))
-    .filter((card) => card !== undefined) as Card[];
+    .filter(
+      (card) =>
+        card !== undefined &&
+        card.spells[0].name.toLowerCase().includes(currentFilter.value.toLowerCase()),
+    ) as Card[];
 
   return _.sortBy(cards, (c) => qualityRanks[c.quality]);
 });
@@ -422,5 +432,11 @@ ul.cards-list .not-collected {
 .slot-disabled,
 .slot-disabled span {
   color: red;
+}
+
+.search-sort-cards-container {
+  display: flex;
+  justify-content: space-between;
+  margin-right: 5px;
 }
 </style>
