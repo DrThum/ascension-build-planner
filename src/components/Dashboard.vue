@@ -374,4 +374,9 @@ main.no-build {
   flex-grow: 1;
   margin-right: 10px;
 }
+
+.lists .card-list-container:first-child {
+  border-right: solid 3px;
+  padding-right: 4px;
+}
 </style>
