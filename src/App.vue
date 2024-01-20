@@ -3,17 +3,10 @@ import Dashboard from './components/Dashboard.vue';
 </script>
 
 <template>
-  <div id="app">
-    <Dashboard />
-  </div>
+  <Dashboard />
 </template>
 
 <style>
-html,
-body {
-  width: 100%;
-}
-
 div#app {
   width: 100%;
 }

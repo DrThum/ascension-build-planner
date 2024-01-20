@@ -258,7 +258,7 @@ header {
 }
 
 main.no-build {
-  height: 100vh;
+  height: 98vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
