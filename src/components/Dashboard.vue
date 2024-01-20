@@ -140,9 +140,9 @@ function closeBuild() {
   }
 }
 
-async function deleteBuild(event) {
+async function deleteBuild(event: MouseEvent) {
   confirm.require({
-    target: event.currentTarget,
+    target: event.currentTarget! as HTMLElement,
     message: 'Are you sure you want to delete this build?',
     icon: 'pi pi-exclamation-triangle',
     acceptClass: 'p-button-danger p-button-sm',
