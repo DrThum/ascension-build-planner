@@ -49,7 +49,7 @@
       @complete="performSearch"
       @item-select="cardSelected"
       scrollHeight="500px"
-      :placeholder="`Search ${props.title}`"
+      :placeholder="`Add ${props.title}...`"
     >
       <template #option="slotProps">
         <div class="flex align-options-center">
