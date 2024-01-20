@@ -121,6 +121,13 @@ function loadBuild() {
 async function saveBuild() {
   const buildId = await upsert(toRaw(currentBuild));
   currentBuild.id = buildId;
+
+  toast.add({
+    severity: 'success',
+    summary: 'Done',
+    detail: 'Build saved',
+    life: 3000,
+  });
 }
 
 function closeBuild() {
