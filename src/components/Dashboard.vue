@@ -2,7 +2,7 @@
   <Toast />
   <ConfirmPopup></ConfirmPopup>
   <header v-if="currentBuild && currentBuild.name">
-    <div>
+    <div class="build-controls">
       <InputText type="text" v-model="currentBuild.name" />
       <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
       <Button
@@ -56,19 +56,23 @@
     </div>
   </main>
   <main v-else class="no-build">
-    <div v-if="savedBuilds && savedBuilds.length > 0">
-      <Dropdown
-        v-model="selectedBuildId"
-        :options="savedBuilds"
-        optionLabel="name"
-        optionValue="id"
-      />
-      <Button icon="pi pi-folder-open" label="Load" iconPos="right" @click="loadBuild" />
-      <hr />
-    </div>
-    <div>
-      <InputText type="text" v-model="newBuildName" />
-      <Button icon="pi pi-plus-circle" iconPos="right" label="Create" @click="create" />
+    <div class="no-build-container">
+      <div v-if="savedBuilds && savedBuilds.length > 0">
+        <div class="load-build-controls">
+          <Dropdown
+            v-model="selectedBuildId"
+            :options="savedBuilds"
+            optionLabel="name"
+            optionValue="id"
+          />
+          <Button icon="pi pi-folder-open" label="Load" iconPos="right" @click="loadBuild" />
+        </div>
+        <hr />
+      </div>
+      <div class="load-build-controls">
+        <InputText type="text" v-model="newBuildName" />
+        <Button icon="pi pi-plus-circle" iconPos="right" label="Create" @click="create" />
+      </div>
     </div>
   </main>
 
@@ -227,6 +231,10 @@ async function importCollection() {
 </script>
 
 <style scoped>
+.build-controls .p-button {
+  margin-left: 40px;
+}
+
 #skills-and-groups {
   display: flex;
   width: 100%;
@@ -264,5 +272,20 @@ main.no-build {
   justify-content: center;
   align-items: center;
   margin: auto;
+}
+
+.no-build-container {
+  min-width: 25%;
+  display: flex;
+  flex-direction: column;
+}
+
+.load-build-controls {
+  display: flex;
+}
+
+.load-build-controls :first-child {
+  flex-grow: 1;
+  margin-right: 10px;
 }
 </style>
