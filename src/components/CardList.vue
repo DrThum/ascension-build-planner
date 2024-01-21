@@ -17,7 +17,7 @@
           >)</span
         >
       </li>
-      <li v-for="_i in new Array(3 - cardedNormal.length)">
+      <li v-for="_i in new Array(Math.max(cardSlotCount - cardedNormal.length, 0))">
         <span class="empty-card-slot">&lt;empty slot&gt;</span>
       </li>
     </ul>
@@ -37,12 +37,12 @@
           >)
         </span>
       </li>
-      <li v-for="_i in new Array(3 - cardedGolden.length)" class="golden">
+      <li v-for="_i in new Array(Math.max(cardSlotCount - cardedGolden.length, 0))" class="golden">
         <span class="empty-card-slot">&lt;empty slot&gt;</span>
       </li>
     </ul>
 
-    <h3>All {{ title.toLowerCase() }} ({{ cardIds.length }}/{{ threshold }})</h3>
+    <h3>All {{ title.toLowerCase() }} ({{ cardIds.length }}/{{ maxCardCount }})</h3>
     <div class="search-sort-cards-container">
       <AutoComplete
         v-model="search"
@@ -105,12 +105,12 @@
               {
                 label: hasCardSlotted(card.normalCardId) ? 'Unslot' : 'Slot as normal',
                 class:
-                  cardedNormal.length >= 3 && !hasCardSlotted(card.normalCardId)
+                  cardedNormal.length >= cardSlotCount && !hasCardSlotted(card.normalCardId)
                     ? 'slot-disabled'
                     : '',
                 icon:
                   (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
-                    cardedNormal.length < 3) ||
+                    cardedNormal.length < cardSlotCount) ||
                   hasCardSlotted(card.normalCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
@@ -119,12 +119,12 @@
               {
                 label: hasCardSlotted(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
                 class:
-                  cardedGolden.length >= 3 && !hasCardSlotted(card.goldenCardId)
+                  cardedGolden.length >= cardSlotCount && !hasCardSlotted(card.goldenCardId)
                     ? 'slot-disabled'
                     : '',
                 icon:
                   (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
-                    cardedGolden.length < 3) ||
+                    cardedGolden.length < cardSlotCount) ||
                   hasCardSlotted(card.goldenCardId)
                     ? PrimeIcons.CHECK_CIRCLE
                     : PrimeIcons.EXCLAMATION_CIRCLE,
@@ -181,7 +181,11 @@ const props = defineProps({
     type: String as PropType<CardCategory>,
     required: true,
   },
-  threshold: {
+  maxCardCount: {
+    type: Number,
+    required: true,
+  },
+  cardSlotCount: {
     type: Number,
     required: true,
   },
@@ -286,11 +290,11 @@ function slotCard(card: Card, isGolden: boolean) {
       const index = cardedGoldenIds.value.indexOf(card.goldenCardId);
       cardedGoldenIds.value.splice(index, 1);
     } else {
-      if (cardedGoldenIds.value.length >= 3) {
+      if (cardedGoldenIds.value.length >= props.cardSlotCount) {
         toast.add({
           severity: 'error',
           summary: 'Too many slotted cards',
-          detail: 'You already have 3 slotted golden cards',
+          detail: `You already have ${props.cardSlotCount} slotted golden cards`,
           life: 3000,
         });
         return;
@@ -308,11 +312,11 @@ function slotCard(card: Card, isGolden: boolean) {
       const index = cardedNormalIds.value.indexOf(card.normalCardId);
       cardedNormalIds.value.splice(index, 1);
     } else {
-      if (cardedNormalIds.value.length >= 3) {
+      if (cardedNormalIds.value.length >= props.cardSlotCount) {
         toast.add({
           severity: 'error',
           summary: 'Too many slotted cards',
-          detail: 'You already have 3 slotted normal cards',
+          detail: `You already have ${props.cardSlotCount} slotted normal cards`,
           life: 3000,
         });
         return;
