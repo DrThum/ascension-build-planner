@@ -1,6 +1,7 @@
 export type Build = {
   id: number | undefined;
   name: string;
+  notes?: string;
   abilityCardIds: number[];
   talentCardIds: number[];
   cardedSetup: {

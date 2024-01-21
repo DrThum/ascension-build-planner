@@ -36,7 +36,30 @@
       />
     </div>
   </header>
-  <main v-if="currentBuild && (currentBuild.id || currentBuild.name)">
+  <main v-if="currentBuild && (currentBuild.id || currentBuild.name)" class="dashboard-main">
+    <div id="starting-abilities-and-notes">
+      <div></div>
+      <div>
+        <Button
+          icon="pi pi-pencil"
+          iconPos="right"
+          label="Toggle notes"
+          @click="notesVisible = true"
+        />
+        <Sidebar
+          v-model:visible="notesVisible"
+          header="Notes"
+          position="right"
+          class="notes-container"
+          style="width: 40rem"
+        >
+          <textarea
+            placeholder="Enter your notes here (explanations, rotations, alternatives, ...)"
+            v-model="currentBuild.notes"
+          ></textarea>
+        </Sidebar>
+      </div>
+    </div>
     <div id="skills-and-groups">
       <div id="skills">
         <div class="lists">
@@ -101,6 +124,7 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
 import TextArea from 'primevue/textarea';
+import Sidebar from 'primevue/sidebar';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
@@ -123,6 +147,7 @@ const selectedBuildId = ref(0);
 const newBuildName = ref('');
 const isImportDialogVisible = ref(false);
 const collectionImportString = ref('');
+const notesVisible = ref(false);
 const cardsStore = useCardsStore();
 
 const toast = useToast();
@@ -380,5 +405,24 @@ main.no-build {
   border-right: solid 3px;
   padding-right: 4px;
   margin-right: 8px;
+}
+
+.dashboard-main {
+  padding-top: 20px;
+}
+
+#starting-abilities-and-notes {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.notes-container {
+  width: 40rem;
+}
+
+.notes-container textarea {
+  width: 100%;
+  height: 99%;
 }
 </style>
