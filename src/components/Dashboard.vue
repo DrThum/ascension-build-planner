@@ -1,7 +1,7 @@
 <template>
   <Toast />
   <ConfirmPopup></ConfirmPopup>
-  <header v-if="currentBuild && currentBuild.name">
+  <header v-if="currentBuild && (currentBuild.id || currentBuild.name)">
     <div class="build-controls">
       <InputText type="text" v-model="currentBuild.name" />
       <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
@@ -36,7 +36,7 @@
       />
     </div>
   </header>
-  <main v-if="currentBuild && currentBuild.name">
+  <main v-if="currentBuild && (currentBuild.id || currentBuild.name)">
     <div id="skills-and-groups">
       <div id="skills">
         <div class="lists">
