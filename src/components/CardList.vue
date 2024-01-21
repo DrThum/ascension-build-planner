@@ -77,17 +77,29 @@
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
               .description
           "
-          ><span class="card-spell-name">{{ card.spells[0].name }}</span>
+          ><span class="card-spell-name">
+            {{ card.spells[0].name }}
+          </span>
           <br />
           <span
-            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0"
+            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0 && card.maxRank === 1"
             class="card-collected-indicator spell-metadata"
             >N</span
           >
           <span
-            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0"
+            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0 && card.maxRank > 1"
+            class="card-collected-indicator spell-metadata"
+            >{{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }}</span
+          >
+          <span
+            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0 && card.maxRank === 1"
             class="card-collected-indicator golden spell-metadata"
             >G</span
+          >
+          <span
+            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0 && card.maxRank > 1"
+            class="card-collected-indicator golden spell-metadata"
+            >{{ cardsStore.collectedRank(card.goldenCardId, true) }}/{{ card.maxRank }}</span
           >
           <span class="required-level spell-metadata">(lvl {{ card.requiredLevel }})</span></span
         >
