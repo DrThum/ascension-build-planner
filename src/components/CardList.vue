@@ -67,7 +67,33 @@
         </template>
       </AutoComplete>
 
-      <InputText type="text" v-model="currentFilter" placeholder="Filter cards..." />
+      <div class="sort-filter-cards-container">
+        <div class="sort-cards-container">
+          <span>Sort by</span>
+          <Button
+            label="Quality"
+            text
+            size="small"
+            :severity="currentSort === Sort.QUALITY ? 'primary' : 'secondary'"
+            @click="sortBy(Sort.QUALITY)"
+          />
+          <Button
+            label="Level"
+            text
+            size="small"
+            :severity="currentSort === Sort.LEVEL ? 'primary' : 'secondary'"
+            @click="sortBy(Sort.LEVEL)"
+          />
+          <Button
+            label="Name"
+            text
+            size="small"
+            :severity="currentSort === Sort.NAME ? 'primary' : 'secondary'"
+            @click="sortBy(Sort.NAME)"
+          />
+        </div>
+        <InputText type="text" v-model="currentFilter" placeholder="Filter cards..." />
+      </div>
     </div>
 
     <ul class="cards-list">
@@ -203,9 +229,22 @@ const props = defineProps({
   },
 });
 
+enum Sort {
+  QUALITY = 'quality',
+  LEVEL = 'level',
+  NAME = 'name',
+}
+
+enum SortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 const search = ref('');
 const searchResults = ref([] as Array<Card>);
 const currentFilter = ref('');
+const currentSort = ref(Sort.QUALITY);
+const currentSortDirection = ref(SortDirection.ASC);
 
 const dataSource =
   props.cardCategory === CardCategory.Ability ? cardsStore.all.ability : cardsStore.all.talent;
@@ -240,7 +279,25 @@ const cards = computed(() => {
         card.spells[0].name.toLowerCase().includes(currentFilter.value.toLowerCase()),
     ) as Card[];
 
-  return _.sortBy(cards, (c) => [qualityRanks[c.quality], c.spells[0].name]);
+  if (currentSort.value === Sort.QUALITY) {
+    return _.orderBy(
+      cards,
+      [(c) => qualityRanks[c.quality], 'spells[0].name'],
+      [currentSortDirection.value, SortDirection.ASC],
+    );
+  }
+
+  if (currentSort.value === Sort.LEVEL) {
+    return _.orderBy(
+      cards,
+      ['requiredLevel', 'spells[0].name'],
+      [currentSortDirection.value, SortDirection.ASC],
+    );
+  }
+
+  if (currentSort.value === Sort.NAME) {
+    return _.orderBy(cards, ['spells[0].name'], [currentSortDirection.value]);
+  }
 });
 
 const cardedNormal = computed(() => {
@@ -346,6 +403,17 @@ function slotCard(card: Card, isGolden: boolean) {
 
 function hasCardSlotted(cardId: number): boolean {
   return cardedNormalIds.value.includes(cardId) || cardedGoldenIds.value.includes(cardId);
+}
+
+function sortBy(sort: Sort) {
+  if (currentSort.value === sort) {
+    currentSortDirection.value =
+      currentSortDirection.value === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC;
+    return;
+  }
+
+  currentSort.value = sort;
+  currentSortDirection.value = SortDirection.ASC;
 }
 </script>
 
@@ -454,5 +522,21 @@ ul.cards-list .not-collected {
   display: flex;
   justify-content: space-between;
   margin-right: 5px;
+}
+.sort-filter-cards-container {
+  display: flex;
+  align-items: center;
+}
+
+.sort-cards-container {
+  font-weight: bold;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.sort-cards-container > span:first-child {
+  height: 45px;
+  line-height: 40px;
 }
 </style>
