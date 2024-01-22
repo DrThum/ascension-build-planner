@@ -177,7 +177,7 @@
                         ? 'Unset as starting'
                         : 'Set as starting',
                       icon:
-                        startingCardIds?.length < 4
+                        (startingCardIds?.length || 0) < 4
                           ? PrimeIcons.CHECK_CIRCLE
                           : PrimeIcons.EXCLAMATION_CIRCLE,
                       command: () => toggleStartingCard(card.normalCardId),
