@@ -139,36 +139,51 @@
           />
           <Menu
             :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
-            :model="[
-              {
-                label: hasCardSlotted(card.normalCardId) ? 'Unslot' : 'Slot as normal',
-                class:
-                  cardedNormal.length >= cardSlotCount && !hasCardSlotted(card.normalCardId)
-                    ? 'slot-disabled'
-                    : '',
-                icon:
-                  (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
-                    cardedNormal.length < cardSlotCount) ||
-                  hasCardSlotted(card.normalCardId)
-                    ? PrimeIcons.CHECK_CIRCLE
-                    : PrimeIcons.EXCLAMATION_CIRCLE,
-                command: () => slotCard(card, false),
-              },
-              {
-                label: hasCardSlotted(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
-                class:
-                  cardedGolden.length >= cardSlotCount && !hasCardSlotted(card.goldenCardId)
-                    ? 'slot-disabled'
-                    : '',
-                icon:
-                  (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
-                    cardedGolden.length < cardSlotCount) ||
-                  hasCardSlotted(card.goldenCardId)
-                    ? PrimeIcons.CHECK_CIRCLE
-                    : PrimeIcons.EXCLAMATION_CIRCLE,
-                command: () => slotCard(card, true),
-              },
-            ]"
+            :model="
+              card.requiredLevel > 1
+                ? [
+                    {
+                      label: hasCardSlotted(card.normalCardId) ? 'Unslot' : 'Slot as normal',
+                      class:
+                        cardedNormal.length >= cardSlotCount && !hasCardSlotted(card.normalCardId)
+                          ? 'slot-disabled'
+                          : '',
+                      icon:
+                        (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
+                          cardedNormal.length < cardSlotCount) ||
+                        hasCardSlotted(card.normalCardId)
+                          ? PrimeIcons.CHECK_CIRCLE
+                          : PrimeIcons.EXCLAMATION_CIRCLE,
+                      command: () => slotCard(card, false),
+                    },
+                    {
+                      label: hasCardSlotted(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
+                      class:
+                        cardedGolden.length >= cardSlotCount && !hasCardSlotted(card.goldenCardId)
+                          ? 'slot-disabled'
+                          : '',
+                      icon:
+                        (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
+                          cardedGolden.length < cardSlotCount) ||
+                        hasCardSlotted(card.goldenCardId)
+                          ? PrimeIcons.CHECK_CIRCLE
+                          : PrimeIcons.EXCLAMATION_CIRCLE,
+                      command: () => slotCard(card, true),
+                    },
+                  ]
+                : [
+                    {
+                      label: hasStartingCardSlotted(card.normalCardId)
+                        ? 'Unset as starting'
+                        : 'Set as starting',
+                      icon:
+                        startingCardIds?.length < 4
+                          ? PrimeIcons.CHECK_CIRCLE
+                          : PrimeIcons.EXCLAMATION_CIRCLE,
+                      command: () => toggleStartingCard(card.normalCardId),
+                    },
+                  ]
+            "
             :popup="true"
           />
           <Button
@@ -205,6 +220,9 @@ const cardsStore = useCardsStore();
 const cardIds: Ref<number[]> = defineModel({ required: true });
 const cardedNormalIds: Ref<number[]> = defineModel('cardSlotsNormal', { required: true });
 const cardedGoldenIds: Ref<number[]> = defineModel('cardSlotsGolden', { required: true });
+const startingCardIds: Ref<number[] | undefined> = defineModel('startingCardIds', {
+  required: false,
+});
 
 const slotCardMenuRefs = ref({} as { [x: number]: any });
 
@@ -414,6 +432,19 @@ function sortBy(sort: Sort) {
 
   currentSort.value = sort;
   currentSortDirection.value = SortDirection.ASC;
+}
+
+function hasStartingCardSlotted(cardId: number): boolean {
+  return startingCardIds.value?.includes(cardId) ?? false;
+}
+
+function toggleStartingCard(cardId: number) {
+  if (hasStartingCardSlotted(cardId)) {
+    const index = startingCardIds.value!.indexOf(cardId);
+    startingCardIds.value!.splice(index, 1);
+  } else if (startingCardIds.value !== undefined) {
+    startingCardIds.value.push(cardId);
+  }
 }
 </script>
 

@@ -38,7 +38,31 @@
   </header>
   <main v-if="currentBuild && (currentBuild.id || currentBuild.name)" class="dashboard-main">
     <div id="starting-abilities-and-notes">
-      <div></div>
+      <div>
+        <div id="starting-abilities">
+          <h3>Starting abilities</h3>
+          <ul>
+            <li v-for="card in startAbilityCards" :class="qualityToCssClass(card.quality)">
+              <span
+                v-tooltip.left="
+                  cardsStore.spellForCard(card.normalCardId, CardCategory.Ability, false)
+                    .description
+                "
+                >{{ card.spells[0].name }} (<span
+                  :class="{
+                    'not-collected': cardsStore.collectedRank(card.normalCardId, false) === 0,
+                  }"
+                >
+                  {{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }} </span
+                >)</span
+              >
+            </li>
+            <li v-for="_i in new Array(Math.max(4 - startAbilityCards.length, 0))">
+              <span class="empty-card-slot">&lt;empty slot&gt;</span>
+            </li>
+          </ul>
+        </div>
+      </div>
       <div>
         <Button
           icon="pi pi-pencil"
@@ -70,6 +94,7 @@
             v-model="currentBuild.abilityCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGoldenIds"
+            v-model:startingCardIds="currentBuild.startAbilityCardIds"
             :card-category="CardCategory.Ability"
           />
           <CardList
@@ -117,7 +142,7 @@
 </template>
 
 <script setup async lang="ts">
-import { ref, type Ref, reactive, toRaw, onBeforeMount, watch } from 'vue';
+import { ref, type Ref, reactive, toRaw, onBeforeMount, watch, computed } from 'vue';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -139,7 +164,7 @@ import type { Build } from '@/types/build.types';
 import { useCardsStore } from '@/stores/cards';
 
 import { liveQuery } from 'dexie';
-import { CardCategory } from '@/types/cards.types';
+import { CardCategory, CardQuality, type Card } from '@/types/cards.types';
 import { useObservable, from } from '@vueuse/rxjs';
 
 const currentBuild = reactive({} as Build);
@@ -156,6 +181,7 @@ const confirm = useConfirm();
 function loadBuild() {
   Object.assign(
     currentBuild,
+    { startAbilityCardIds: [] },
     savedBuilds.value.find((sb) => sb.id === selectedBuildId.value),
   );
 }
@@ -202,6 +228,7 @@ async function create() {
     name: newBuildName.value,
     abilityCardIds: [],
     talentCardIds: [],
+    startAbilityCardIds: [],
     cardedSetup: {
       abilityNormalIds: [],
       abilityGoldenIds: [],
@@ -340,6 +367,31 @@ async function importCollection() {
     isImportDialogVisible.value = false;
   }
 }
+
+const startAbilityCards = computed(() => {
+  return (
+    (currentBuild?.startAbilityCardIds
+      ?.map((cardId) => cardsStore.all.ability.find((c) => c.normalCardId === cardId))
+      .filter((card) => card !== undefined) as Card[]) ?? []
+  );
+});
+
+function qualityToCssClass(quality: CardQuality) {
+  switch (quality) {
+    case CardQuality.Common:
+      return 'quality-common';
+    case CardQuality.Uncommon:
+      return 'quality-uncommon';
+    case CardQuality.Rare:
+      return 'quality-rare';
+    case CardQuality.Epic:
+      return 'quality-epic';
+    case CardQuality.Legendary:
+      return 'quality-legendary';
+    default:
+      throw new Error(`unexpected card quality ${quality}`);
+  }
+}
 </script>
 
 <style scoped>
@@ -424,5 +476,49 @@ main.no-build {
 .notes-container textarea {
   width: 100%;
   height: 99%;
+}
+
+#starting-abilities {
+  display: flex;
+  align-items: center;
+}
+
+#starting-abilities ul {
+  display: flex;
+  list-style: none;
+}
+
+#starting-abilities ul li {
+  border: solid 2px lightgrey;
+  border-radius: 8px;
+  margin: 8px 5px 8px 0;
+  padding: 5px;
+  list-style: none;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-weight: bold;
+}
+
+#starting-abilities ul li.quality-common {
+  border-color: #ffffff;
+}
+
+#starting-abilities ul li.quality-uncommon {
+  border-color: #1eff00;
+}
+
+#starting-abilities ul li.quality-rare {
+  border-color: #0070dd;
+}
+
+#starting-abilities ul li.quality-epic {
+  border-color: #a335ee;
+}
+
+#starting-abilities ul li.quality-legendary {
+  border-color: #ff8000;
 }
 </style>

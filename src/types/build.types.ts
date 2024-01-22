@@ -4,6 +4,7 @@ export type Build = {
   notes?: string;
   abilityCardIds: number[];
   talentCardIds: number[];
+  startAbilityCardIds?: number[];
   cardedSetup: {
     abilityNormalIds: number[]; // Max 2
     abilityGoldenIds: number[]; // Max 2
