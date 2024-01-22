@@ -267,17 +267,29 @@ const currentSortDirection = ref(SortDirection.ASC);
 const dataSource =
   props.cardCategory === CardCategory.Ability ? cardsStore.all.ability : cardsStore.all.talent;
 function performSearch() {
-  searchResults.value = dataSource.filter((card) => {
+  const spellNameMatching = dataSource.filter((card) => {
     const cardAlreadyChosen = cardIds.value.includes(card.normalCardId);
-    const allSpellNamesAndDescr = card.spells
-      .map((spell) => `${spell.name} ${spell.description}`)
-      .join('\n');
-    const spellNameOrDescriptionMatches = allSpellNamesAndDescr
+    const spellNameOrDescriptionMatches = card.spells[0].name
       .toLowerCase()
       .includes(search.value.toLowerCase());
 
     return !cardAlreadyChosen && spellNameOrDescriptionMatches;
   });
+
+  const spellDescriptionMatching = dataSource.filter((card) => {
+    const cardAlreadyChosen = cardIds.value.includes(card.normalCardId);
+    const allSpellDescr = card.spells.map((spell) => `${spell.description}`).join('\n');
+    const spellDescriptionMatches = allSpellDescr
+      .toLowerCase()
+      .includes(search.value.toLowerCase());
+
+    return !cardAlreadyChosen && spellDescriptionMatches;
+  });
+
+  searchResults.value = _.uniqBy(
+    spellNameMatching.concat(spellDescriptionMatching),
+    'normalCardId',
+  );
 }
 
 const qualityRanks = {
