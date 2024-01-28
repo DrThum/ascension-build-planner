@@ -56,6 +56,15 @@
                   {{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }} </span
                 >)</span
               >
+
+              <Button
+                icon="pi pi-trash"
+                role="remove-spell"
+                severity="secondary"
+                text
+                class="p-button-xsm"
+                @click="removeStartingCard(card)"
+              />
             </li>
             <li v-for="_i in new Array(Math.max(4 - startAbilityCards.length, 0))">
               <span class="empty-card-slot">&lt;empty slot&gt;</span>
@@ -271,8 +280,6 @@ onBeforeMount(async () => {
       const resp = new Response(compressedReadableStream);
       const blob = await resp.blob();
 
-      const btext = await blob.text();
-
       const sharedBuild = JSON.parse(await blob.text());
       Object.assign(currentBuild, sharedBuild, { id: undefined });
 
@@ -375,6 +382,13 @@ const startAbilityCards = computed(() => {
       .filter((card) => card !== undefined) as Card[]) ?? []
   );
 });
+
+function removeStartingCard(card: Card) {
+  const index = currentBuild?.startAbilityCardIds?.indexOf(card.normalCardId);
+  if (index !== undefined && index > -1) {
+    currentBuild?.startAbilityCardIds?.splice(index, 1);
+  }
+}
 
 function qualityToCssClass(quality: CardQuality) {
   switch (quality) {
