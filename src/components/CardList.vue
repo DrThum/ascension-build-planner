@@ -176,8 +176,15 @@
                       label: hasStartingCardSlotted(card.normalCardId)
                         ? 'Unset as starting'
                         : 'Set as starting',
+                      class:
+                        (startingCardIds?.length || 0) >= 4 &&
+                        !hasStartingCardSlotted(card.normalCardId)
+                          ? 'slot-disabled'
+                          : '',
+
                       icon:
-                        (startingCardIds?.length || 0) < 4
+                        (startingCardIds?.length || 0) < 4 ||
+                        hasStartingCardSlotted(card.normalCardId)
                           ? PrimeIcons.CHECK_CIRCLE
                           : PrimeIcons.EXCLAMATION_CIRCLE,
                       command: () => toggleStartingCard(card.normalCardId),
@@ -455,6 +462,16 @@ function toggleStartingCard(cardId: number) {
     const index = startingCardIds.value!.indexOf(cardId);
     startingCardIds.value!.splice(index, 1);
   } else if (startingCardIds.value !== undefined) {
+    if (startingCardIds.value.length >= 4) {
+      toast.add({
+        severity: 'error',
+        summary: 'Too many starting cards',
+        detail: `You already have 4 starting cards`,
+        life: 3000,
+      });
+      return;
+    }
+
     startingCardIds.value.push(cardId);
   }
 }
