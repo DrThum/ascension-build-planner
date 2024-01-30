@@ -42,7 +42,11 @@
         <div id="starting-abilities">
           <h3>Starting abilities</h3>
           <ul>
-            <li v-for="card in startAbilityCards" :class="qualityToCssClass(card.quality)">
+            <li
+              v-for="card in startAbilityCards"
+              :key="card.normalCardId"
+              :class="qualityToCssClass(card.quality)"
+            >
               <span
                 v-tooltip.left="
                   cardsStore.spellForCard(card.normalCardId, CardCategory.Ability, false)
@@ -66,7 +70,7 @@
                 @click="removeStartingCard(card)"
               />
             </li>
-            <li v-for="_i in new Array(Math.max(4 - startAbilityCards.length, 0))">
+            <li v-for="i in new Array(Math.max(4 - startAbilityCards.length, 0))" :key="i">
               <span class="empty-card-slot">&lt;empty slot&gt;</span>
             </li>
           </ul>

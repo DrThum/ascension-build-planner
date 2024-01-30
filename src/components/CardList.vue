@@ -5,7 +5,11 @@
     <h3>Card slots</h3>
 
     <ul class="cards-list">
-      <li v-for="card in cardedNormal" :class="qualityToCssClass(card.quality)">
+      <li
+        v-for="card in cardedNormal"
+        :key="card.normalCardId"
+        :class="qualityToCssClass(card.quality)"
+      >
         <span
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false).description
@@ -17,13 +21,18 @@
           >)</span
         >
       </li>
-      <li v-for="_i in new Array(Math.max(cardSlotCount - cardedNormal.length, 0))">
+      <li v-for="i in new Array(Math.max(cardSlotCount - cardedNormal.length, 0))" :key="i">
         <span class="empty-card-slot">&lt;empty slot&gt;</span>
       </li>
     </ul>
 
     <ul class="cards-list">
-      <li v-for="card in cardedGolden" :class="qualityToCssClass(card.quality)" class="golden">
+      <li
+        v-for="card in cardedGolden"
+        :key="card.goldenCardId"
+        :class="qualityToCssClass(card.quality)"
+        class="golden"
+      >
         <span
           v-tooltip.left="
             cardsStore.spellForCard(card.goldenCardId, cardCategory, true).description
@@ -37,7 +46,11 @@
           >)
         </span>
       </li>
-      <li v-for="_i in new Array(Math.max(cardSlotCount - cardedGolden.length, 0))" class="golden">
+      <li
+        v-for="i in new Array(Math.max(cardSlotCount - cardedGolden.length, 0))"
+        :key="i"
+        class="golden"
+      >
         <span class="empty-card-slot">&lt;empty slot&gt;</span>
       </li>
     </ul>
@@ -97,7 +110,7 @@
     </div>
 
     <ul class="cards-list">
-      <li v-for="card in cards" :class="qualityToCssClass(card.quality)">
+      <li v-for="card in cards" :key="card.normalCardId" :class="qualityToCssClass(card.quality)">
         <span
           v-tooltip.left="
             cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
@@ -334,6 +347,8 @@ const cards = computed(() => {
   if (currentSort.value === Sort.NAME) {
     return _.orderBy(cards, ['spells[0].name'], [currentSortDirection.value]);
   }
+
+  return cards;
 });
 
 const cardedNormal = computed(() => {
