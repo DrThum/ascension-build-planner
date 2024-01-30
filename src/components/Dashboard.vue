@@ -47,27 +47,10 @@
               :key="card.normalCardId"
               :class="qualityToCssClass(card.quality)"
             >
-              <span
-                v-tooltip.left="
-                  cardsStore.spellForCard(card.normalCardId, CardCategory.Ability, false)
-                    .description
-                "
-                >{{ card.spells[0].name }} (<span
-                  :class="{
-                    'not-collected': cardsStore.collectedRank(card.normalCardId, false) === 0,
-                  }"
-                >
-                  {{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }} </span
-                >)</span
-              >
-
-              <Button
-                icon="pi pi-trash"
-                role="remove-spell"
-                severity="secondary"
-                text
-                class="p-button-xsm"
-                @click="removeStartingCard(card)"
+              <CardSlot
+                :card="card"
+                :category="CardCategory.Ability"
+                :onDelete="removeStartingCard"
               />
             </li>
             <li v-for="i in new Array(Math.max(4 - startAbilityCards.length, 0))" :key="i">
@@ -170,6 +153,7 @@ import ConfirmPopup from 'primevue/confirmpopup';
 
 import CardGroupList from './CardGroupList.vue';
 import CardList from './CardList.vue';
+import CardSlot from './card/CardSlot.vue';
 import { deleteById, upsert, list } from '@/services/build.service';
 import { getCollection, replaceCollection } from '@/services/collection.service';
 import type { Build } from '@/types/build.types';
