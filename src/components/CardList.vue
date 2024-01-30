@@ -47,10 +47,10 @@
       <AutoComplete
         v-model="search"
         :suggestions="searchResults"
+        scroll-height="500px"
+        :placeholder="`Add ${props.title}...`"
         @complete="performSearch"
         @item-select="cardSelected"
-        scrollHeight="500px"
-        :placeholder="`Add ${props.title}...`"
       >
         <template #option="slotProps">
           <div class="flex align-options-center">
@@ -92,7 +92,7 @@
             @click="sortBy(Sort.NAME)"
           />
         </div>
-        <InputText type="text" v-model="currentFilter" placeholder="Filter cards..." />
+        <InputText v-model="currentFilter" type="text" placeholder="Filter cards..." />
       </div>
     </div>
 

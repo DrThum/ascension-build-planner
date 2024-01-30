@@ -3,25 +3,25 @@
   <ConfirmPopup></ConfirmPopup>
   <header v-if="currentBuild && (currentBuild.id || currentBuild.name)">
     <div class="build-controls">
-      <InputText type="text" v-model="currentBuild.name" />
-      <Button icon="pi pi-save" iconPos="right" label="Save" @click="saveBuild" />
+      <InputText v-model="currentBuild.name" type="text" />
+      <Button icon="pi pi-save" icon-pos="right" label="Save" @click="saveBuild" />
       <Button
         icon="pi pi-times"
-        iconPos="right"
+        icon-pos="right"
         label="Close"
         severity="secondary"
         @click="closeBuild"
       />
       <Button
         icon="pi pi-trash"
-        iconPos="right"
+        icon-pos="right"
         label="Delete"
         severity="danger"
         @click="deleteBuild($event)"
       />
       <Button
         icon="pi pi-share-alt"
-        iconPos="right"
+        icon-pos="right"
         label="Share"
         severity="success"
         @click="shareBuild"
@@ -30,7 +30,7 @@
     <div>
       <Button
         icon="pi pi-folder-open"
-        iconPos="right"
+        icon-pos="right"
         label="Import cards collection"
         @click="isImportDialogVisible = true"
       />
@@ -75,7 +75,7 @@
       <div>
         <Button
           icon="pi pi-pencil"
-          iconPos="right"
+          icon-pos="right"
           label="Toggle notes"
           @click="notesVisible = true"
         />
@@ -87,8 +87,8 @@
           style="width: 40rem"
         >
           <textarea
-            placeholder="Enter your notes here (explanations, rotations, alternatives, ...)"
             v-model="currentBuild.notes"
+            placeholder="Enter your notes here (explanations, rotations, alternatives, ...)"
           ></textarea>
         </Sidebar>
       </div>
@@ -97,22 +97,22 @@
       <div id="skills">
         <div class="lists">
           <CardList
-            title="Abilities"
-            :max-card-count="36"
-            :card-slot-count="2"
             v-model="currentBuild.abilityCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.abilityNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.abilityGoldenIds"
             v-model:startingCardIds="currentBuild.startAbilityCardIds"
+            title="Abilities"
+            :max-card-count="36"
+            :card-slot-count="2"
             :card-category="CardCategory.Ability"
           />
           <CardList
-            title="Talents"
-            :max-card-count="51"
-            :card-slot-count="3"
             v-model="currentBuild.talentCardIds"
             v-model:cardSlotsNormal="currentBuild.cardedSetup.talentNormalIds"
             v-model:cardSlotsGolden="currentBuild.cardedSetup.talentGoldenIds"
+            title="Talents"
+            :max-card-count="51"
+            :card-slot-count="3"
             :card-category="CardCategory.Talent"
           />
         </div>
@@ -128,16 +128,16 @@
           <Dropdown
             v-model="selectedBuildId"
             :options="savedBuilds"
-            optionLabel="name"
-            optionValue="id"
+            option-label="name"
+            option-value="id"
           />
-          <Button icon="pi pi-folder-open" label="Load" iconPos="right" @click="loadBuild" />
+          <Button icon="pi pi-folder-open" label="Load" icon-pos="right" @click="loadBuild" />
         </div>
         <hr />
       </div>
       <div class="load-build-controls">
-        <InputText type="text" v-model="newBuildName" />
-        <Button icon="pi pi-plus-circle" iconPos="right" label="Create" @click="create" />
+        <InputText v-model="newBuildName" type="text" />
+        <Button icon="pi pi-plus-circle" icon-pos="right" label="Create" @click="create" />
       </div>
     </div>
   </main>
