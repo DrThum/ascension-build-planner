@@ -13,7 +13,7 @@
         <CardSlot
           :card="card"
           :category="props.cardCategory"
-          :onDelete="() => slotCard(card, false)"
+          :onDelete="() => slotCard(card, currentSlotForCard(card), CardSlotType.None)"
         />
       </li>
       <li v-for="i in new Array(Math.max(cardSlotCount - cardedNormal.length, 0))" :key="i">
@@ -31,7 +31,8 @@
         <CardSlot
           :card="card"
           :category="props.cardCategory"
-          :onDelete="() => slotCard(card, true)"
+          :isGoldenSlot="true"
+          :onDelete="() => slotCard(card, currentSlotForCard(card), CardSlotType.None)"
         />
       </li>
       <li
@@ -99,109 +100,16 @@
 
     <ul class="cards-list">
       <li v-for="card in cards" :key="card.normalCardId" :class="qualityToCssClass(card.quality)">
-        <span
-          v-tooltip.left="
-            cardsStore.spellForCard(card.normalCardId, cardCategory, false, card.maxRank)
-              .description
-          "
-          ><span class="card-spell-name">
-            {{ card.spells[0].name }}
-          </span>
-          <br />
-          <span
-            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0 && card.maxRank === 1"
-            class="card-collected-indicator spell-metadata"
-            >N</span
-          >
-          <span
-            v-if="cardsStore.collectedRank(card.normalCardId, false) > 0 && card.maxRank > 1"
-            class="card-collected-indicator spell-metadata"
-            >{{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }}</span
-          >
-          <span
-            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0 && card.maxRank === 1"
-            class="card-collected-indicator golden spell-metadata"
-            >G</span
-          >
-          <span
-            v-if="cardsStore.collectedRank(card.goldenCardId, true) > 0 && card.maxRank > 1"
-            class="card-collected-indicator golden spell-metadata"
-            >{{ cardsStore.collectedRank(card.goldenCardId, true) }}/{{ card.maxRank }}</span
-          >
-          <span class="required-level spell-metadata">(lvl {{ card.requiredLevel }})</span></span
-        >
-        <div>
-          <Button
-            icon="pi pi-credit-card"
-            severity="secondary"
-            text
-            class="p-button-xsm"
-            @click="toggleMenu(card, $event)"
-          />
-          <Menu
-            :ref="(el) => (slotCardMenuRefs[card.normalCardId] = el)"
-            :model="[
-              {
-                label: hasCardSlotted(card.normalCardId) ? 'Unslot' : 'Slot as normal',
-                class:
-                  cardedNormal.length >= cardSlotCount && !hasCardSlotted(card.normalCardId)
-                    ? 'slot-disabled'
-                    : '',
-                icon:
-                  (cardsStore.collectedRank(card.normalCardId, false) > 0 &&
-                    cardedNormal.length < cardSlotCount) ||
-                  hasCardSlotted(card.normalCardId)
-                    ? PrimeIcons.CHECK_CIRCLE
-                    : PrimeIcons.EXCLAMATION_CIRCLE,
-                command: () => slotCard(card, false),
-              },
-              {
-                label: hasCardSlotted(card.goldenCardId) ? 'Unslot' : 'Slot as golden',
-                class:
-                  cardedGolden.length >= cardSlotCount && !hasCardSlotted(card.goldenCardId)
-                    ? 'slot-disabled'
-                    : '',
-                icon:
-                  (cardsStore.collectedRank(card.goldenCardId, true) > 0 &&
-                    cardedGolden.length < cardSlotCount) ||
-                  hasCardSlotted(card.goldenCardId)
-                    ? PrimeIcons.CHECK_CIRCLE
-                    : PrimeIcons.EXCLAMATION_CIRCLE,
-                command: () => slotCard(card, true),
-              },
-              ...(card.requiredLevel <= 1
-                ? [
-                    {
-                      label: hasStartingCardSlotted(card.normalCardId)
-                        ? 'Unset as starting'
-                        : 'Set as starting',
-                      class:
-                        (startingCardIds?.length || 0) >= 4 &&
-                        !hasStartingCardSlotted(card.normalCardId)
-                          ? 'slot-disabled'
-                          : '',
-
-                      icon:
-                        (startingCardIds?.length || 0) < 4 ||
-                        hasStartingCardSlotted(card.normalCardId)
-                          ? PrimeIcons.CHECK_CIRCLE
-                          : PrimeIcons.EXCLAMATION_CIRCLE,
-                      command: () => toggleStartingCard(card.normalCardId),
-                    },
-                  ]
-                : []),
-            ]"
-            :popup="true"
-          />
-          <Button
-            icon="pi pi-trash"
-            role="remove-spell"
-            severity="secondary"
-            text
-            class="p-button-xsm"
-            @click="removeCard(card)"
-          />
-        </div>
+        <CardListCard
+          :card="card"
+          :category="props.cardCategory"
+          :current-slot="currentSlotForCard(card)"
+          :has-free-starting-slots="(startingCardIds?.length ?? 0) < 4"
+          :has-free-normal-slots="cardedNormalIds.length < props.cardSlotCount"
+          :has-free-golden-slots="cardedGoldenIds.length < props.cardSlotCount"
+          :onDelete="() => removeCard(card)"
+          :slotCard="slotCard"
+        />
       </li>
     </ul>
   </div>
@@ -213,15 +121,14 @@ import { CardQuality, type Card } from '../types/cards.types';
 import AutoComplete, { type AutoCompleteItemSelectEvent } from 'primevue/autocomplete';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import Menu from 'primevue/menu';
 import { useCardsStore } from '@/stores/cards';
 import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
 import CardSlot from './card/CardSlot.vue';
+import CardListCard from './card/CardListCard.vue';
 
-import { PrimeIcons } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 
-import { CardCategory } from '@/types/cards.types';
+import { CardCategory, CardSlotType } from '@/types/cards.types';
 
 const cardsStore = useCardsStore();
 
@@ -231,8 +138,6 @@ const cardedGoldenIds: Ref<number[]> = defineModel('cardSlotsGolden', { required
 const startingCardIds: Ref<number[] | undefined> = defineModel('startingCardIds', {
   required: false,
 });
-
-const slotCardMenuRefs = ref({} as { [x: number]: any });
 
 const toast = useToast();
 
@@ -389,62 +294,6 @@ function removeCard(removedCard: Card) {
   cardIds.value.splice(index, 1);
 }
 
-function toggleMenu(card: Card, event: Event) {
-  slotCardMenuRefs.value[card.normalCardId].toggle(event);
-}
-
-function slotCard(card: Card, isGolden: boolean) {
-  if (isGolden) {
-    if (cardedGoldenIds.value.includes(card.goldenCardId)) {
-      const index = cardedGoldenIds.value.indexOf(card.goldenCardId);
-      cardedGoldenIds.value.splice(index, 1);
-    } else {
-      if (cardedGoldenIds.value.length >= props.cardSlotCount) {
-        toast.add({
-          severity: 'error',
-          summary: 'Too many slotted cards',
-          detail: `You already have ${props.cardSlotCount} slotted golden cards`,
-          life: 3000,
-        });
-        return;
-      }
-
-      // Remove from normal carded slots, if needed
-      const indexInNormal = cardedNormalIds.value.indexOf(card.normalCardId);
-      if (indexInNormal > -1) {
-        cardedNormalIds.value.splice(indexInNormal, 1);
-      }
-      cardedGoldenIds.value.push(card.goldenCardId);
-    }
-  } else {
-    if (cardedNormalIds.value.includes(card.normalCardId)) {
-      const index = cardedNormalIds.value.indexOf(card.normalCardId);
-      cardedNormalIds.value.splice(index, 1);
-    } else {
-      if (cardedNormalIds.value.length >= props.cardSlotCount) {
-        toast.add({
-          severity: 'error',
-          summary: 'Too many slotted cards',
-          detail: `You already have ${props.cardSlotCount} slotted normal cards`,
-          life: 3000,
-        });
-        return;
-      }
-
-      // Remove from golden carded slots, if needed
-      const indexInGolden = cardedGoldenIds.value.indexOf(card.goldenCardId);
-      if (indexInGolden > -1) {
-        cardedGoldenIds.value.splice(indexInGolden, 1);
-      }
-      cardedNormalIds.value.push(card.normalCardId);
-    }
-  }
-}
-
-function hasCardSlotted(cardId: number): boolean {
-  return cardedNormalIds.value.includes(cardId) || cardedGoldenIds.value.includes(cardId);
-}
-
 function sortBy(sort: Sort) {
   if (currentSort.value === sort) {
     currentSortDirection.value =
@@ -456,27 +305,95 @@ function sortBy(sort: Sort) {
   currentSortDirection.value = SortDirection.ASC;
 }
 
-function hasStartingCardSlotted(cardId: number): boolean {
-  return startingCardIds.value?.includes(cardId) ?? false;
-}
+function slotCard(card: Card, prevSlot: CardSlotType, newSlot: CardSlotType) {
+  if (prevSlot !== newSlot) {
+    let canSlot = true;
+    let maxSlotted = 4;
+    if (newSlot === CardSlotType.Normal && cardedNormalIds.value.length >= props.cardSlotCount) {
+      canSlot = false;
+      maxSlotted = props.cardSlotCount;
+    } else if (
+      newSlot === CardSlotType.Golden &&
+      cardedGoldenIds.value.length >= props.cardSlotCount
+    ) {
+      canSlot = false;
+      maxSlotted = props.cardSlotCount;
+    } else if (newSlot === CardSlotType.Starting && (startingCardIds.value?.length ?? 0) >= 4) {
+      canSlot = false;
+      maxSlotted = 4;
+    }
 
-function toggleStartingCard(cardId: number) {
-  if (hasStartingCardSlotted(cardId)) {
-    const index = startingCardIds.value!.indexOf(cardId);
-    startingCardIds.value!.splice(index, 1);
-  } else if (startingCardIds.value !== undefined) {
-    if (startingCardIds.value.length >= 4) {
+    if (!canSlot) {
       toast.add({
         severity: 'error',
-        summary: 'Too many starting cards',
-        detail: `You already have 4 starting cards`,
+        summary: 'Too many slotted cards',
+        detail: `You already have ${maxSlotted} cards in that slot`,
         life: 3000,
       });
       return;
     }
-
-    startingCardIds.value.push(cardId);
   }
+
+  switch (prevSlot) {
+    case CardSlotType.Normal: {
+      const index = cardedNormalIds.value.indexOf(card.normalCardId);
+      cardedNormalIds.value.splice(index, 1);
+      break;
+    }
+    case CardSlotType.Golden: {
+      const index = cardedGoldenIds.value.indexOf(card.goldenCardId);
+      cardedGoldenIds.value.splice(index, 1);
+      break;
+    }
+    case CardSlotType.Starting: {
+      if (startingCardIds.value !== undefined) {
+        const index = startingCardIds.value.indexOf(card.normalCardId);
+        startingCardIds.value.splice(index, 1);
+        break;
+      }
+    }
+    default:
+      break;
+  }
+
+  if (prevSlot === newSlot) {
+    return;
+  }
+
+  switch (newSlot) {
+    case CardSlotType.Normal: {
+      cardedNormalIds.value.push(card.normalCardId);
+      break;
+    }
+    case CardSlotType.Golden: {
+      cardedGoldenIds.value.push(card.goldenCardId);
+      break;
+    }
+    case CardSlotType.Starting: {
+      startingCardIds.value !== undefined
+        ? startingCardIds.value.push(card.normalCardId)
+        : (startingCardIds.value = [card.normalCardId]);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function currentSlotForCard(card: Card): CardSlotType {
+  if (cardedNormalIds.value.includes(card.normalCardId)) {
+    return CardSlotType.Normal;
+  }
+
+  if (cardedGoldenIds.value.includes(card.goldenCardId)) {
+    return CardSlotType.Golden;
+  }
+
+  if (startingCardIds.value?.includes(card.normalCardId)) {
+    return CardSlotType.Starting;
+  }
+
+  return CardSlotType.None;
 }
 </script>
 

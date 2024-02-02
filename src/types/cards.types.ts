@@ -39,6 +39,13 @@ export enum CardCategory {
   Talent = 'TALENT',
 }
 
+export enum CardSlotType {
+  None = 'NONE',
+  Starting = 'STARTING',
+  Normal = 'NORMAL',
+  Golden = 'GOLDEN',
+}
+
 export type CardCollection = {
   abilityNormal: CollectedCard[];
   abilityGolden: CollectedCard[];
