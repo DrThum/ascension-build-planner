@@ -10,16 +10,11 @@
         :key="card.normalCardId"
         :class="qualityToCssClass(card.quality)"
       >
-        <span
-          v-tooltip.left="
-            cardsStore.spellForCard(card.normalCardId, cardCategory, false).description
-          "
-          >{{ card.spells[0].name }} (<span
-            :class="{ 'not-collected': cardsStore.collectedRank(card.normalCardId, false) === 0 }"
-          >
-            {{ cardsStore.collectedRank(card.normalCardId, false) }}/{{ card.maxRank }} </span
-          >)</span
-        >
+        <CardSlot
+          :card="card"
+          :category="props.cardCategory"
+          :onDelete="() => slotCard(card, false)"
+        />
       </li>
       <li v-for="i in new Array(Math.max(cardSlotCount - cardedNormal.length, 0))" :key="i">
         <span class="empty-card-slot">&lt;empty slot&gt;</span>
@@ -33,18 +28,11 @@
         :class="qualityToCssClass(card.quality)"
         class="golden"
       >
-        <span
-          v-tooltip.left="
-            cardsStore.spellForCard(card.goldenCardId, cardCategory, true).description
-          "
-        >
-          {{ card.spells[0].name }}
-          (<span
-            :class="{ 'not-collected': cardsStore.collectedRank(card.goldenCardId, true) === 0 }"
-          >
-            {{ cardsStore.collectedRank(card.goldenCardId, true) }}/{{ card.maxRank }} </span
-          >)
-        </span>
+        <CardSlot
+          :card="card"
+          :category="props.cardCategory"
+          :onDelete="() => slotCard(card, true)"
+        />
       </li>
       <li
         v-for="i in new Array(Math.max(cardSlotCount - cardedGolden.length, 0))"
@@ -228,6 +216,7 @@ import Button from 'primevue/button';
 import Menu from 'primevue/menu';
 import { useCardsStore } from '@/stores/cards';
 import { computed, ref, defineModel, type PropType, type Ref } from 'vue';
+import CardSlot from './card/CardSlot.vue';
 
 import { PrimeIcons } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
