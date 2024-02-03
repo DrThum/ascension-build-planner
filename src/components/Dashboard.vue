@@ -130,7 +130,24 @@
   </main>
 
   <Dialog v-model:visible="isImportDialogVisible" modal>
-    <TextArea v-model="collectionImportString" rows="5" cols="100" />
+    <p>
+      To import your card collection, please
+      <a href="/SkillCardsCollector.zip" download>download the addon</a> and extract it in the
+      Interface/AddOn folder of your client installation. Restart the game if needed. You should now
+      have a button labelled "Export collection" on top of the Skill Cards tab of the Character
+      Advancement window.
+    </p>
+    <p>
+      <span class="important-warning">WARNING:</span> Please make sure that you load both tabs
+      (Ability Cards and Talent Cards) at least once to load the cards and that you keep the
+      "Collected Only" filter active!
+    </p>
+    <p>
+      Upon clicking the "Export collection" button, a small text box appears in the center of the
+      screen. Focus it, press ctrl-a to select all, then ctrl-c to copy the text. Then, paste it in
+      the box below and click the Import button. That's it!
+    </p>
+    <TextArea v-model="collectionImportString" rows="5" style="width: 100%" />
     <template #footer>
       <Button label="Import" icon="pi pi-check" @click="importCollection" />
     </template>
@@ -522,5 +539,10 @@ main.no-build {
 
 #starting-abilities ul li.quality-legendary {
   border-color: #ff8000;
+}
+
+.important-warning {
+  color: red;
+  font-weight: bold;
 }
 </style>
