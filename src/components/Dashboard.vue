@@ -143,9 +143,8 @@
       "Collected Only" filter active!
     </p>
     <p>
-      Upon clicking the "Export collection" button, a small text box appears in the center of the
-      screen. Focus it, press ctrl-a to select all, then ctrl-c to copy the text. Then, paste it in
-      the box below and click the Import button. That's it!
+      Upon clicking the "Export collection" button, your current card collection is stored in your
+      clipboard. Paste it in the box below and click the Import button. That's it!
     </p>
     <TextArea v-model="collectionImportString" rows="5" style="width: 100%" />
     <template #footer>
@@ -377,6 +376,7 @@ async function importCollection() {
     });
   } finally {
     isImportDialogVisible.value = false;
+    collectionImportString.value = '';
   }
 }
 
