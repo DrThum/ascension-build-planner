@@ -430,10 +430,10 @@ async function importBuild() {
       name: 'Imported build',
       abilityCardIds: knownSpells.skills
         .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Ability, false))
-        .filter((card) => card !== undefined),
+        .filter((card) => card !== undefined) as number[],
       talentCardIds: knownSpells.talents
         .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Talent, false))
-        .filter((card) => card !== undefined),
+        .filter((card) => card !== undefined) as number[],
       startAbilityCardIds: [],
       cardedSetup: {
         abilityNormalIds: [], // TODO
