@@ -126,6 +126,11 @@
         <InputText v-model="newBuildName" type="text" />
         <Button icon="pi pi-plus-circle" icon-pos="right" label="Create" @click="create" />
       </div>
+      <hr />
+      <div class="load-build-controls">
+        <InputText v-model="importBuildString" type="text" />
+        <Button icon="pi pi-plus-circle" icon-pos="right" label="Import" @click="importBuild" />
+      </div>
     </div>
   </main>
 
@@ -183,6 +188,7 @@ import { useObservable, from } from '@vueuse/rxjs';
 const currentBuild = reactive({} as Build);
 const selectedBuildId = ref(0);
 const newBuildName = ref('');
+const importBuildString = ref('');
 const isImportDialogVisible = ref(false);
 const collectionImportString = ref('');
 const notesVisible = ref(false);
@@ -409,6 +415,53 @@ function qualityToCssClass(quality: CardQuality) {
       return 'quality-legendary';
     default:
       throw new Error(`unexpected card quality ${quality}`);
+  }
+}
+
+async function importBuild() {
+  try {
+    const knownSpells: { skills: number[]; talents: number[] } = JSON.parse(
+      importBuildString.value,
+    );
+
+    // TODO: Initialize progress mode from collected spells
+    const importedBuild: Build = {
+      id: undefined,
+      name: 'Imported build',
+      abilityCardIds: knownSpells.skills
+        .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Ability, false))
+        .filter((card) => card !== undefined),
+      talentCardIds: knownSpells.talents
+        .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Talent, false))
+        .filter((card) => card !== undefined),
+      startAbilityCardIds: [],
+      cardedSetup: {
+        abilityNormalIds: [], // TODO
+        abilityGoldenIds: [], // TODO
+        talentNormalIds: [], // TODO
+        talentGoldenIds: [], // TODO
+      },
+    };
+
+    const buildId = await upsert(importedBuild);
+
+    toast.add({
+      severity: 'success',
+      summary: 'Done',
+      detail: 'Build imported',
+      life: 3000,
+    });
+
+    Object.assign(currentBuild, importedBuild, { id: buildId });
+  } catch (e) {
+    console.error('error loading imported build:', e);
+
+    toast.add({
+      severity: 'error',
+      summary: 'Error importing build',
+      detail: 'The imported build format is incorrect',
+      life: 3000,
+    });
   }
 }
 </script>

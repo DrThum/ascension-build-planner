@@ -86,6 +86,19 @@ export const useCardsStore = defineStore('cards', {
         return relevantCollectedCards.find((c) => c.cardId === cardId)?.rank ?? 0;
       };
     },
+    cardForSpell: (state) => {
+      return (spellId: number, category: CardCategory, isGolden: boolean) => {
+        const relevantCards =
+          category === CardCategory.Ability ? state.all.ability : state.all.talent;
+        const card = relevantCards.find((card) => card.spells.map((s) => s.id).includes(spellId));
+
+        if (card !== undefined) {
+          return isGolden ? card.goldenCardId : card.normalCardId;
+        }
+
+        return undefined;
+      };
+    },
   },
 });
 
