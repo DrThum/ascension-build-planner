@@ -177,7 +177,7 @@ import CardList from './CardList.vue';
 import CardSlot from './card/CardSlot.vue';
 import { deleteById, upsert, list } from '@/services/build.service';
 import { getCollection, replaceCollection } from '@/services/collection.service';
-import type { Build } from '@/types/build.types';
+import type { Build, ImportBuildData } from '@/types/build.types';
 
 import { useCardsStore } from '@/stores/cards';
 
@@ -420,26 +420,24 @@ function qualityToCssClass(quality: CardQuality) {
 
 async function importBuild() {
   try {
-    const knownSpells: { skills: number[]; talents: number[] } = JSON.parse(
-      importBuildString.value,
-    );
+    const importData: ImportBuildData = JSON.parse(importBuildString.value);
 
     // TODO: Initialize progress mode from collected spells
     const importedBuild: Build = {
       id: undefined,
       name: 'Imported build',
-      abilityCardIds: knownSpells.skills
+      abilityCardIds: importData.skills
         .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Ability, false))
         .filter((card) => card !== undefined) as number[],
-      talentCardIds: knownSpells.talents
+      talentCardIds: importData.talents
         .map((knownSpellId) => cardsStore.cardForSpell(knownSpellId, CardCategory.Talent, false))
         .filter((card) => card !== undefined) as number[],
       startAbilityCardIds: [],
       cardedSetup: {
-        abilityNormalIds: [], // TODO
-        abilityGoldenIds: [], // TODO
-        talentNormalIds: [], // TODO
-        talentGoldenIds: [], // TODO
+        abilityNormalIds: importData.carded.ability.normal,
+        abilityGoldenIds: importData.carded.ability.golden,
+        talentNormalIds: importData.carded.talent.normal,
+        talentGoldenIds: importData.carded.talent.golden,
       },
     };
 

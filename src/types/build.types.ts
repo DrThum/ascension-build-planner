@@ -12,3 +12,18 @@ export type Build = {
     talentGoldenIds: number[]; // Max 3
   };
 };
+
+export type ImportBuildData = {
+  skills: number[];
+  talents: number[];
+  carded: {
+    ability: {
+      normal: number[];
+      golden: number[];
+    };
+    talent: {
+      normal: number[];
+      golden: number[];
+    };
+  };
+};
